@@ -1,0 +1,303 @@
+Warning: Setting up fake worker.
+--- PDF TEXT START ---
+EPOS — Onchain Payment Protocol for Nigeria                                                                                                                                          Page 1
+Version 1.0 · 2025 · Product Brief
+Largest in Africa                                            via 5.5M terminals                                         per transaction
+13M+                   ν18 Trillion           ν50–ν100
+NIGERIA CRYPTO USERS                          POS TRANSACTIONS 2024                        AVG BANK TRANSFER FEE
+Send a request. Get paid in seconds. No bank. No fees. No wahala.
+The Onchain Payment Protocol for Nigeria
+EPOS
+----------------Page (0) Break----------------
+EPOS — Onchain Payment Protocol for Nigeria                                                                                                                                          Page 2
+10          Vision & Roadmap
+09          Competitive Landscape
+08          Target Users
+07          Onchain Economics — Why It Costs Almost Nothing
+06          Technical Architecture
+05          How It Works — The User Journey
+04          Core Features
+03          The Solution — Epos as a Product
+02          The Problem — Why Nigeria Needs This
+01          What is Epos? — The Slang, The Culture, The Context
+What's Inside
+[ CONTENTS ]
+----------------Page (1) Break----------------
+EPOS — Onchain Payment Protocol for Nigeria                                                                                                                                          Page 3
+invite support from mutuals and followers. It has become Nigeria's informal payment request culture —
+("epos, hook me up"), in DMs to friends ("bro epos transport fare?"), and as a caption on social media to
+"Epos" specifically lives at the intersection of vulnerability and hope. It is used under posts about success
+and across Lagos, Abuja, Ibadan, Port Harcourt, and everywhere in between.
+vocabulary of Nigeria's informal financial life — spoken on Twitter/X, WhatsApp, in markets, in universities,
+Slangs like "aza" (bank account number), "epos" (if possible), and "sapa" (being broke) have become the
+of "Igwe bu ike" (strength in numbers) both reflect a culture where interdependence is a feature, not a bug.
+not seen as weakness but as community. The Yoruba concept of "νgbν" (social circle) and the Igbo idea
+Nigeria is a country of extraordinary social density. People ask each other for favours constantly — this is
+Cultural Roots
+epos o                  Softened/pleading           "Abeg epos o, I dey need am"
+e possible             Uncontracted                  "E possible you go come?"
+e pos                    Two-word form                "E pos you fit help?"
+epos                     Standard                         "Send alert epos?"
+Form                           Usage                                       Example
+Pronunciation & Common Forms
+spirit of togetherness.
+equivalent of stretching out a hand without begging. It carries warmth, humour, and the deeply Nigerian
+stakes of asking for help. In a country where money is tight but community is strong, "epos" is the linguistic
+The genius of "epos" is its social intelligence. It is not a demand — it is an invitation. It lowers the social
+"Send 5k epos?" means "Send me ν5,000 if you can."
+that softens requests, adds humour to hardship, and builds genuine human connection between people.
+warm contraction of "e possible?" (is it possible?). It belongs to a long tradition of Nigerian street language
+"Epos" (also written "e pos") is a Nigerian Pidgin English slang phrase meaning "if possible" — a casual,
+The Slang
+What is Epos?
+[ 01 — LANGUAGE & CULTURE ]
+----------------Page (2) Break----------------
+EPOS — Onchain Payment Protocol for Nigeria                                                                                                                                          Page 4
+and it has never had a dedicated digital home. Until now.
+----------------Page (3) Break----------------
+EPOS — Onchain Payment Protocol for Nigeria                                                                                                                                          Page 5
+banks never will.
+them. Smartphone penetration keeps rising — a mobile-first, wallet-first approach can reach people that
+Over 38 million Nigerian adults remain unbanked according to EFInA. Traditional fintech has not reached
+ν 38 Million Unbanked Adults
+enormous.
+links exist but route through banks. Crypto wallets are hard to use and have no social layer. The gap is
+There is no product that maps Nigeria's informal "epos" culture to a digital, onchain experience. PayMe
+ν No Onchain Payment Request Culture
+erode in real terms. Nigerians need a way to hold and spend stable value without the volatility.
+The Naira has lost over 70% of its value against the dollar since 2020. Savings and payments in Naira
+ν Naira Volatility
+even more. The system taxes the poor the most.
+POS agents charge ν100–ν200 per withdrawal on top of the bank's cut. Nigerians outside Lagos pay
+ν POS Agent Charges
+lost to fees alone. The banks profit. The people do not.
+Every Naira transfer costs ν50–ν100. For a creator receiving 200 tips a month, that is ν10,000–ν20,000
+ν Bank Transfer Fees
+amounts.
+enormous friction every time they want to send or receive money — especially in small, everyday
+Nigeria has one of the most vibrant informal payment ecosystems in the world. Yet its people still face
+Why Nigeria Needs This
+[ 02 — THE PROBLEM ]
+----------------Page (4) Break----------------
+EPOS — Onchain Payment Protocol for Nigeria                                                                                                                                          Page 6
+powered by stablecoins, settled in seconds.
+a social payment layer built for Nigeria's informal economy,
+Epos is the onchain version of "send me money epos" —
+The One-Line Pitch
+middleman taking a cut. Instant. Transparent. Onchain.
+— that anyone else can fulfill directly from a crypto wallet. No bank account needed. No POS agent. No
+At its core, Epos lets anyone create a payment request — with an amount, a reason, and a shareable link
+"Epos?" → Link → Wallet → Paid. That's it.
+language, for their culture, solving their real problems.
+Epos is an onchain payment request protocol designed from the ground up for Nigerians — in their
+Epos — The Product
+[ 03 — THE SOLUTION ]
+----------------Page (5) Break----------------
+EPOS — Onchain Payment Protocol for Nigeria                                                                                                                                          Page 7
+→ Embeddable button code for personal websites
+→ Creator keeps 100% minus tiny gas fee (~ν15)
+→ Receives in USDC — zero exposure to Naira devaluation
+→ Permanent tip button for any creator, always live
+percentage, no monthly subscription required, and no Naira volatility to worry about.
+their social profiles and content. Fans send tips directly in USDC stablecoin — no third party takes a
+Content creators, comedians, musicians, writers, and skit makers can place a permanent Epos button on
+Epos for Creators
+→ Profile photo, bio, and social links included
+→ Verifiable, censorship-resistant, and permanent
+→ Supports multiple wallet addresses
+→ Username registered onchain via smart contract
+page can send you money instantly without knowing anything about crypto.
+Clean. Human. Shareable. Your handle maps to your wallet address onchain — so anyone who visits your
+Instead of sharing a confusing crypto address like 0x3f9...a81, your profile lives at epos.xyz/@yourname.
+Epos Wallet Tag (@handle)
+→ Shareable as a URL, QR code, or embeddable button
+→ Link stays active until manually closed or fulfilled
+→ Works across any device and platform
+→ No bank account required to receive payment
+Telegram. Anyone with a crypto wallet can fulfill it with one tap. No account creation needed for the payer.
+"data subscription", "fund my hustle"), and share it anywhere — Twitter, WhatsApp, Instagram bio,
+Generate a shareable payment request link in seconds. Set an amount, write a reason ("school fees",
+Epos Links
+What Epos Does
+[ 04 — CORE FEATURES ]
+----------------Page (6) Break----------------
+EPOS — Onchain Payment Protocol for Nigeria                                                                                                                                          Page 8
+→ Filter by amount, category, or community
+→ Public celebration of fulfilled requests
+→ Fulfill any request from the feed in one click
+→ Follow friends and browse their active requests
+It becomes a community of mutual aid, generosity, and connection.
+from the wider community. Fulfilled requests are celebrated publicly — turning Epos into more than a tool.
+A social discovery timeline where users can browse open payment requests from people they follow or
+Epos Feed (Optional Layer)
+----------------Page (7) Break----------------
+EPOS — Onchain Payment Protocol for Nigeria                                                                                                                                          Page 9
+Requester's wallet receives USDC. Transaction is public and permanent.
+Step 5        Done
+Wallet prompts for signature — gas is fractions of a cent on Base
+Step 4        Sign Transaction
+Sees exact USDC amount, confirms the transaction details
+Step 3        Review & Confirm
+One-click wallet connect — no account or sign-up needed
+Step 2        Connect Wallet
+Opens the Epos page — sees the request, amount, and reason clearly
+Step 1        Click the Link
+For the Person Fulfilling the Request
+USDC lands in your wallet instantly when someone fulfills it. Zero cut.
+Step 5        Get Paid
+Copy URL or QR code. Post anywhere. Your Epos is live.
+Step 4        Share the Link
+Enter amount (e.g. 10 USDC), reason (e.g. 'fuel money'), optional expiry
+Step 3        Create a Request
+Pick @yourname — stored onchain permanently. Free on Base.
+Step 2        Claim Your Handle
+Connect MetaMask, Coinbase Wallet, or Rainbow to epos.xyz
+Step 1        Connect Wallet
+For the Request Creator
+How It Works
+[ 05 — USER JOURNEY ]
+----------------Page (8) Break----------------
+EPOS — Onchain Payment Protocol for Nigeria                                                                                                                                        Page 10
+timestamp, and fulfilled status.
+Request Registry: Stores all payment requests: creator address, amount in USDC, reason, expiry
+but always unique. First claim is free.
+Handle Registry: Maps @username to wallet address. Each handle is an NFT — ownable, transferable,
+The Epos smart contract handles three core registries:
+Smart Contract Design
+OnRamper
+Buy USDC with Naira or card                                  Partner fee
+On-Ramp
+Coinbase /
+RainbowKit
+Sign-in with Ethereum wallet                                    Free
+Wallet Auth
+WalletConnect /
+The web interface users see and use                      Free tier
+Frontend                Next.js + Vercel
+Profile pictures, request metadata                           Free tier
+Storage                  IPFS / Pinata
+Protocol
+Query chain events for the Feed                              Free tier
+Data Index
+The Graph
+Stable payments — no Naira volatility                         Free
+Currency                USDC (Circle)
+Contract                                                                                                                       deploy
+Handles, requests, payment records
+Solidity / Foundry
+Free after
+Smart
+Ethereum)                     registry
+~$2–5 once
+Blockchain
+Smart contracts, transactions, handle
+Base (L2
+Layer                             Technology                           Purpose                                                                   Cost
+Stack Overview
+company holding user funds. Every component is either onchain or on decentralised infrastructure.
+Epos is built as a fully decentralised application (dApp) with no central server, no database, and no
+How It's Built
+[ 06 — TECHNICAL ARCHITECTURE ]
+----------------Page (9) Break----------------
+EPOS — Onchain Payment Protocol for Nigeria                                                                                                                                        Page 11
+Fully public and auditable.
+Payment Ledger: Records every fulfilled payment — who paid, how much, when, and for which request.
+----------------Page (10) Break----------------
+EPOS — Onchain Payment Protocol for Nigeria                                                                                                                                        Page 12
+→ On-ramp revenue share with fiat-to-crypto partners
+→ B2B API — businesses embedding Epos payment buttons in their apps
+→ Creator subscriptions — recurring monthly Epos from fans
+→ Premium short handles sold as NFTs (e.g. @tunde, @lagos)
+→ Optional 0.5–1% fee on fulfilled requests above a threshold
+scale:
+Version 1 charges zero platform fees to maximise adoption. Future revenue streams once the network has
+Revenue Model — Future Phases
+* Gas estimates based on Base L2 averages of ~$0.001–0.01 per transaction (2025)
+—
+Epos Platform Fee          0% (v1)                         0% (v1)
+~2 seconds
+Epos on Base                 <$0.01 (~ν15)                                 <$0.01 (~ν15)
+Instant (cash)
+POS Agent                      ν100–ν200 fee                          ν200–ν500 fee
+Minutes–Hours
+Bank Transfer                 ν50–ν100 fee                          ν100 fee
+Method                                     Send ν5,000                                      Send ν50,000                                      Speed
+Cost Comparison
+Ethereum Layer 2 chain, which reduces fees to fractions of a cent.
+can cost $5–50 — making small payments like ν5,000 completely unviable. Epos is built on Base, an
+One of the biggest objections to crypto products is gas fees. On Ethereum mainnet, a single transaction
+Why It Costs Almost Nothing
+[ 07 — ONCHAIN ECONOMICS ]
+----------------Page (11) Break----------------
+EPOS — Onchain Payment Protocol for Nigeria                                                                                                                                        Page 13
+They have wallets but no easy way to share payment requests with friends who are new to crypto.
+The 13 million Nigerians already using crypto who lack a social payment product built for their culture.
+Crypto-Native Nigerians
+payment requests in USDC — avoiding Western Union fees and terrible exchange rates.
+Nigerians in the UK, US, Canada, and Europe who send money home regularly. Epos lets them fulfill
+Diaspora Senders
+POS machine, without agent fees, and without waiting for slow bank settlement.
+Market traders, artisans, freelancers, and small business owners who want to receive payments without a
+Small Business Owners
+and friends without the bank drama.
+conversation. Epos the product is their natural digital upgrade — post a request, get money from family
+University students navigating sapa, tuition fees, and daily expenses. They already use "epos" in daily
+Students
+onchain and fee-free.
+ready to support them but no easy way to receive that support. Epos becomes their always-live tip jar —
+Skit makers, YouTubers, podcasters, Twitter personalities, and Instagram comedians who have audiences
+Content Creators
+Who Uses Epos
+[ 08 — TARGET USERS ]
+----------------Page (12) Break----------------
+EPOS — Onchain Payment Protocol for Nigeria                                                                                                                                        Page 14
+stablecoin payments, and a social layer. Epos owns this space entirely.
+No existing product combines onchain infrastructure, Nigerian cultural context,
+GoFundMe           ν                             ν                             ν                             Partial                   ν
+MetaMask            ν                             ν                             ν                             ν                             ~
+Binance Pay         Partial                   ν                             ν                             ν                             Partial
+Flutterwave          ν                             Partial                   ν                             ν                             ν
+PayStack              ν                             Partial                   ν                             ν                             ν
+Epos                     ν                             ν                             ν                             ν                             ν v1
+Product                       Onchain                      Naija Culture              Stablecoin                  Social Layer               Zero Fee
+How Epos Stands Apart
+[ 09 — COMPETITIVE LANDSCAPE ]
+----------------Page (13) Break----------------
+EPOS — Onchain Payment Protocol for Nigeria                                                                                                                                        Page 15
+→ Epos for businesses — invoice and payroll features
+→ Premium handle marketplace
+→ Multi-chain support (Solana, Celo)
+→ Recurring Epos (fan subscriptions for creators)
+→ Epos Protocol API — let other apps embed Epos payments
+Phase 3 — Ecosystem (2026)
+→ Twitter/X and WhatsApp sharing optimisation
+→ Fiat on-ramp (buy USDC with Naira)
+→ Mobile-optimised progressive web app
+→ Epos Feed — social discovery layer
+→ Creator profiles and persistent tip buttons
+Phase 2 — Growth (Q3–Q4 2025)
+→ USDC payments working end-to-end
+→ Basic Epos link creation and fulfillment
+→ Handle registration live onchain
+→ Build and launch epos.xyz frontend
+→ Deploy smart contracts on Base testnet
+Phase 1 — Foundation (Q1–Q2 2025)
+Roadmap
+money moves in seconds, costs nothing, and lives on a transparent ledger that nobody controls.
+The long-term vision: a world where "send me epos" is as natural as "send me your aza" — except the
+freeze, no government can block, and no fintech can deplatform.
+Nigerian with an Epos handle has a permanent, censorship-resistant payment identity that no bank can
+Epos is not just a payment tool. It is the beginning of an onchain financial identity layer for Nigerians. Every
+The Big Vision
+Where Epos is Going
+[ 10 — VISION & ROADMAP ]
+----------------Page (14) Break----------------
+EPOS — Onchain Payment Protocol for Nigeria                                                                                                                                        Page 16
+epos.xyz · 2025 · Built on Base
+payment request should feel like — light, human, and full of possibility. Epos is that word, given a product.
+Nigeria has 13 million crypto users, 200 million people, and a slang word that perfectly describes what a
+Built for the streets. Settled on-chain.
+Epos.
+----------------Page (15) Break----------------
+
+--- PDF TEXT END ---
