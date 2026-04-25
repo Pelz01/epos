@@ -11,11 +11,6 @@ export function Hero() {
       
       <div className={styles.container}>
         <div className={`${styles.content} animate-fade-in`}>
-          <div className={styles.badge}>
-            <span className={styles.badgeDot}></span>
-            Built on Base L2
-          </div>
-          
           <h1 className={styles.title}>
             <Typewriter />
           </h1>

@@ -9,6 +9,12 @@ const phrases = [
   "super mom?",
   "my guy?",
   "boss?",
+  "chief?",
+  "my ski?",
+  "idan?",
+  "odogwu?",
+  "alhaji?",
+  "oba?",
 ];
 
 export function Typewriter() {
