@@ -131,14 +131,25 @@
   .heroSection {
     min-height: auto;
     justify-content: flex-start;
-    padding: 96px 1rem 3rem;
+    padding: 112px 1rem 3rem;
   }
 
   .container {
-    gap: 1.25rem;
+    gap: 1.5rem;
   }
 
   .content {
-    gap: 1.25rem;
+    gap: 1.35rem;
+  }
+
+  .title {
+    font-size: 2.8rem;
+    line-height: 1.08;
+  }
+
+  .subtitle {
+    max-width: 22rem;
+    font-size: 1.05rem;
+    line-height: 1.55;
   }
 }

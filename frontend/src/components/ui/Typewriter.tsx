@@ -48,7 +48,7 @@ export function Typewriter() {
   }, [text, isDeleting, loopNum, typingSpeed]);
 
   return (
-    <span style={{ position: 'relative', whiteSpace: 'nowrap' }}>
+    <span style={{ position: 'relative', display: 'inline-block', maxWidth: '100%' }}>
       <span className="text-primary" style={{ fontWeight: 700 }}>epos, {text}</span>
       <span style={{ 
         borderRight: '2px solid var(--primary)', 
