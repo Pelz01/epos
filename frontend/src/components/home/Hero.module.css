@@ -126,3 +126,19 @@
     font-size: 3.5rem;
   }
 }
+
+@media (max-width: 768px) {
+  .heroSection {
+    min-height: auto;
+    justify-content: flex-start;
+    padding: 96px 1rem 3rem;
+  }
+
+  .container {
+    gap: 1.25rem;
+  }
+
+  .content {
+    gap: 1.25rem;
+  }
+}
