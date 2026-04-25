@@ -1,19 +1,43 @@
-.pageContainer {
-  min-height: 100vh;
+/* ===== Page Container ===== */
+.mainContent {
+  padding: 3rem 4rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 4rem 1rem;
-  background: var(--background);
+  gap: 2rem;
+  width: 100%;
 }
 
+/* ===== Page Header ===== */
+.pageHeader {
+  margin-bottom: 0.5rem;
+}
+
+.pageTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin-bottom: 0.25rem;
+}
+
+.pageSubtitle {
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+/* ===== Two-Column Grid ===== */
+.profileGrid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 2rem;
+  align-items: start;
+}
+
+/* ===== Profile Card (Left Column) ===== */
 .profileCard {
   width: 100%;
-  max-width: 480px;
-  background: #ffffff;
-  border-radius: 32px;
-  border: 1px solid var(--glass-border);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04);
+}
+
+.cardInner {
   overflow: hidden;
 }
 
@@ -26,43 +50,45 @@
   border-bottom: 1px solid var(--glass-border);
 }
 
-.avatar {
-  width: 96px;
-  height: 96px;
-  border-radius: 50%;
-  background: var(--glass-border);
+.avatarWrapper {
+  position: relative;
   margin-bottom: 1rem;
-  overflow: hidden;
-  border: 4px solid #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-.avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 4px solid #ffffff;
 }
 
 .name {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.75rem;
+  font-weight: 800;
   color: var(--foreground);
   margin-bottom: 0.25rem;
+  letter-spacing: -0.02em;
 }
 
 .handle {
-  color: var(--text-muted);
-  font-weight: 500;
+  color: var(--primary);
+  font-weight: 600;
   margin-bottom: 1rem;
+  background: var(--primary-glow);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
 }
 
 .bio {
   color: var(--foreground);
-  font-size: 0.95rem;
-  line-height: 1.5;
-  opacity: 0.8;
+  font-size: 1rem;
+  line-height: 1.6;
+  opacity: 0.9;
+  max-width: 400px;
 }
 
+/* ===== Send Widget (inside card) ===== */
 .body {
   padding: 2rem;
   display: flex;
@@ -73,13 +99,13 @@
 .inputGroup {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 
 .label {
   font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-muted);
+  font-weight: 700;
+  color: var(--foreground);
 }
 
 .amountInputWrapper {
@@ -90,27 +116,29 @@
 
 .currencySymbol {
   position: absolute;
-  left: 1rem;
+  left: 1.25rem;
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--foreground);
 }
 
 .amountInput {
   width: 100%;
-  padding: 1rem 1rem 1rem 2.5rem;
-  font-size: 1.5rem;
-  font-weight: 700;
+  padding: 1.25rem 1rem 1.25rem 3rem;
+  font-size: 2rem;
+  font-weight: 800;
   border: 2px solid var(--glass-border);
   border-radius: 16px;
   outline: none;
-  transition: border-color 0.2s ease;
-  background: #f9fafb;
+  transition: all 0.2s ease;
+  background: rgba(255,255,255,0.6);
+  color: var(--foreground);
 }
 
 .amountInput:focus {
   border-color: var(--primary);
   background: #ffffff;
+  box-shadow: 0 0 0 4px var(--primary-glow);
 }
 
 .quickAmounts {
@@ -120,18 +148,21 @@
 
 .quickAmountBtn {
   flex: 1;
-  padding: 0.75rem;
+  padding: 0.875rem;
   border-radius: 12px;
   border: 1px solid var(--glass-border);
-  background: transparent;
-  font-weight: 600;
+  background: rgba(255,255,255,0.5);
+  font-weight: 700;
+  color: var(--foreground);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .quickAmountBtn:hover {
-  background: rgba(0, 0, 0, 0.03);
-  border-color: rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-1px);
 }
 
 .messageInput {
@@ -141,21 +172,149 @@
   border-radius: 16px;
   outline: none;
   font-family: inherit;
-  font-size: 0.95rem;
+  font-size: 1rem;
   resize: vertical;
   min-height: 100px;
-  background: #f9fafb;
-  transition: border-color 0.2s ease;
+  background: rgba(255,255,255,0.6);
+  transition: all 0.2s ease;
 }
 
 .messageInput:focus {
   border-color: var(--primary);
   background: #ffffff;
+  box-shadow: 0 0 0 4px var(--primary-glow);
 }
 
+.sendBtn {
+  width: 100%;
+  padding: 1.25rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+}
+
+.sendBtn:hover {
+  transform: translateY(-1px);
+}
+
+/* ===== Side Column (Right) ===== */
+.sideColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  position: sticky;
+  top: 2rem;
+}
+
+/* ===== Stats Card ===== */
+.statsCard {
+  padding: 1.5rem;
+}
+
+.statsTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin-bottom: 1.25rem;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.statItem {
+  text-align: center;
+  padding: 1rem;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.statValue {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--foreground);
+  margin-bottom: 0.25rem;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ===== Wall of Love ===== */
+.wallOfLove {
+  /* no extra spacing needed */
+}
+
+.wallTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin-bottom: 1rem;
+}
+
+.wallList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.wallItem {
+  padding: 1.25rem;
+  border-radius: 16px;
+}
+
+.wallItemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.wallSender {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.wallAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.wallSenderName {
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.wallAmount {
+  font-weight: 800;
+  color: #10B981;
+}
+
+.wallMessage {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  font-style: italic;
+  margin-bottom: 0.5rem;
+}
+
+.wallTime {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+/* ===== Footer ===== */
 .footer {
   text-align: center;
-  margin-top: 2rem;
+  margin-top: 1rem;
   font-size: 0.875rem;
   color: var(--text-muted);
 }
@@ -163,4 +322,23 @@
 .footerLink {
   color: var(--foreground);
   font-weight: 600;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1024px) {
+  .mainContent {
+    padding: 2rem;
+  }
+
+  .profileGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .sideColumn {
+    position: static;
+  }
+
+  .pageHeader {
+    text-align: center;
+  }
 }

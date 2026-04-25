@@ -1,53 +1,47 @@
-.pageContainer {
-  min-height: 100vh;
-  background: var(--background);
-  padding-bottom: 4rem;
+.mainContent {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 3rem 4rem;
+  gap: 2rem;
 }
 
 .header {
-  background: #ffffff;
-  border-bottom: 1px solid var(--glass-border);
-  padding: 1.5rem 2rem;
-  position: sticky;
-  top: 0;
-  z-index: 40;
+  /* no special background — consistent with Dashboard header style */
 }
 
 .headerContent {
-  max-width: 600px;
-  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 .title {
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: 700;
   color: var(--foreground);
 }
 
+.layoutGrid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 2rem;
+  align-items: start;
+}
+
 .feedContainer {
-  max-width: 600px;
-  margin: 2rem auto 0;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  padding: 0 1rem;
 }
 
 .card {
-  background: #ffffff;
-  border: 1px solid var(--glass-border);
-  border-radius: 20px;
   padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease;
 }
 
 .card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
 }
 
 .cardHeader {
@@ -61,14 +55,7 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: var(--glass-border);
   overflow: hidden;
-}
-
-.avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 .userInfo {
@@ -77,11 +64,12 @@
 }
 
 .name {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--foreground);
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-size: 1.125rem;
 }
 
 .time {
@@ -102,18 +90,18 @@
 .reason {
   font-size: 1.125rem;
   color: var(--foreground);
-  line-height: 1.5;
+  line-height: 1.6;
   margin-bottom: 1rem;
 }
 
 .amountBadge {
   display: inline-block;
-  background: rgba(16, 185, 129, 0.1);
-  color: #10B981;
+  background: var(--primary-glow);
+  color: var(--primary);
   padding: 0.5rem 1rem;
   border-radius: 9999px;
   font-weight: 700;
-  font-size: 1.25rem;
+  font-size: 1.125rem;
 }
 
 .cardFooter {
@@ -121,7 +109,7 @@
   align-items: center;
   justify-content: space-between;
   border-top: 1px solid var(--glass-border);
-  padding-top: 1rem;
+  padding-top: 1.25rem;
 }
 
 .progressContainer {
@@ -135,19 +123,140 @@
 .progressText {
   font-size: 0.875rem;
   color: var(--text-muted);
-  font-weight: 500;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
 }
 
 .progressBar {
   width: 100%;
-  height: 6px;
-  background: var(--glass-border);
+  height: 8px;
+  background: rgba(0,0,0,0.05);
   border-radius: 9999px;
   overflow: hidden;
 }
 
 .progressFill {
   height: 100%;
-  background: var(--primary);
+  background: linear-gradient(90deg, var(--secondary), var(--accent));
   border-radius: 9999px;
+  transition: width 1s ease-in-out;
+}
+
+.eposeBtn {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  padding: 0.5rem 1.5rem;
+  font-weight: 600;
+}
+
+.eposeBtn:hover {
+  transform: translateY(-1px);
+}
+
+.sidebar {
+  position: sticky;
+  top: 6rem;
+}
+
+.leaderboardCard {
+  padding: 1.5rem;
+}
+
+.leaderboardHeader {
+  margin-bottom: 1.5rem;
+}
+
+.leaderboardTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin-bottom: 0.25rem;
+}
+
+.leaderboardDesc {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.ogaList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.ogaItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.5);
+  transition: background 0.2s;
+}
+
+.ogaItem:hover {
+  background: #ffffff;
+}
+
+.ogaItemLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ogaRank {
+  font-weight: 800;
+  color: var(--text-muted);
+  width: 16px;
+  text-align: center;
+}
+
+.ogaAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.ogaHandle {
+  font-weight: 600;
+  color: var(--foreground);
+  font-size: 0.875rem;
+}
+
+.ogaDonated {
+  font-weight: 700;
+  color: #10B981;
+}
+
+.viewLeaderboardBtn {
+  display: block;
+  text-align: center;
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 12px;
+  background: var(--primary-glow);
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.viewLeaderboardBtn:hover {
+  background: rgba(37, 99, 235, 0.25);
+}
+
+@media (max-width: 1024px) {
+  .mainContent {
+    padding: 2rem;
+  }
+
+  .layoutGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .sidebar {
+    display: none;
+  }
 }
