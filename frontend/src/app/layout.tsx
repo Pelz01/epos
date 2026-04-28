@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
+import { EposProvider } from "@/components/epos/EposProvider";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -20,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${outfit.variable}`}>
-        {children}
+        <EposProvider>{children}</EposProvider>
       </body>
     </html>
   );

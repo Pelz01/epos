@@ -1,121 +1,114 @@
-import React from 'react';
-import Link from 'next/link';
-import styles from './Profile.module.css';
-import { Button } from '@/components/ui/Button';
-import AppLayout from '@/components/layout/AppLayout';
+"use client";
 
-export default async function UserProfilePage({ params }: { params: Promise<{ username: string }> }) {
-  const { username } = await params;
-  
-  // Mock User Data based on username
-  const cleanUsername = username.replace('%40', '').toLowerCase();
-  
-  const wallOfLove = [
-    { id: 1, sender: '@mary', amount: 50, message: "Keep up the great work! Love your videos.", time: "2h ago", color: "#FF6B6B" },
-    { id: 2, sender: '@davido', amount: 15, message: "For the culture 🇳🇬", time: "1d ago", color: "#4facfe" },
-    { id: 3, sender: 'Anonymous', amount: 5, message: "A small token of appreciation.", time: "3d ago", color: "#a18cd1" }
-  ];
+import React, { use, useMemo } from "react";
+import Link from "next/link";
+import AppLayout from "@/components/layout/AppLayout";
+import { Button } from "@/components/ui/Button";
+import { useEpos } from "@/components/epos/EposProvider";
+import phaseStyles from "@/components/epos/Phase1.module.css";
+
+export default function UserProfilePage({ params }: { params: Promise<{ username: string }> }) {
+  const { username } = use(params);
+  const { requests, currentUser } = useEpos();
+  const clean = username.replace(/^@+/, "").toLowerCase();
+
+  const userRequests = useMemo(
+    () => requests.filter((item) => item.username === clean),
+    [requests, clean],
+  );
+
+  const totalReceived = userRequests
+    .filter((item) => item.status === "fulfilled")
+    .reduce((sum, item) => sum + item.amount, 0);
+
+  const isOwner = currentUser?.username === clean;
+  const openRequests = userRequests.filter((item) => item.status === "open");
 
   return (
     <AppLayout>
-      <div className={styles.mainContent}>
-        <header className={styles.pageHeader}>
-          <h1 className={styles.pageTitle}>Public Profile</h1>
-          <p className={styles.pageSubtitle}>This is how others see you when they visit your link.</p>
-        </header>
-
-        <div className={styles.profileGrid}>
-          {/* Left column: Profile Card + Send Widget */}
-          <div className={styles.profileCard}>
-            <div className={`${styles.cardInner} glass-panel`}>
-              <div className={styles.header}>
-                <div className={styles.avatarWrapper}>
-                  <div className={styles.avatar} style={{ background: 'linear-gradient(135deg, var(--primary), var(--accent))' }}>
-                  </div>
-                </div>
-                <h2 className={styles.name}>{cleanUsername}</h2>
-                <p className={styles.handle}>@{cleanUsername}</p>
-                <p className={styles.bio}>
-                  Creating amazing content on YouTube. Every contribution goes toward new gear and studio time! 🎥✨
-                </p>
-              </div>
-
-              <div className={styles.body}>
-                <div className={styles.inputGroup}>
-                  <label className={styles.label}>Send Amount</label>
-                  <div className={styles.amountInputWrapper}>
-                    <span className={styles.currencySymbol}>$</span>
-                    <input type="number" className={styles.amountInput} placeholder="0" defaultValue="5" min="1" />
-                  </div>
-                  
-                  <div className={styles.quickAmounts}>
-                    <button className={styles.quickAmountBtn}>$2</button>
-                    <button className={styles.quickAmountBtn}>$5</button>
-                    <button className={styles.quickAmountBtn}>$10</button>
-                    <button className={styles.quickAmountBtn}>$50</button>
-                  </div>
-                </div>
-
-                <div className={styles.inputGroup}>
-                  <label className={styles.label}>Message (Optional)</label>
-                  <textarea className={styles.messageInput} placeholder="Say something nice..." />
-                </div>
-
-                <Button variant="primary" className={styles.sendBtn}>
-                  Send USDC
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Right column: Wall of Love + Stats */}
-          <div className={styles.sideColumn}>
-            <div className={`${styles.statsCard} glass-panel`}>
-              <h3 className={styles.statsTitle}>Profile Stats</h3>
-              <div className={styles.statsGrid}>
-                <div className={styles.statItem}>
-                  <div className={styles.statValue}>$70</div>
-                  <div className={styles.statLabel}>Total Received</div>
-                </div>
-                <div className={styles.statItem}>
-                  <div className={styles.statValue}>3</div>
-                  <div className={styles.statLabel}>Supporters</div>
-                </div>
-                <div className={styles.statItem}>
-                  <div className={styles.statValue}>Lv 3</div>
-                  <div className={styles.statLabel}>Oga Level</div>
-                </div>
-                <div className={styles.statItem}>
-                  <div className={styles.statValue}>#12</div>
-                  <div className={styles.statLabel}>Leaderboard</div>
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.wallOfLove}>
-              <h3 className={styles.wallTitle}>Wall of Love 💖</h3>
-              <div className={styles.wallList}>
-                {wallOfLove.map(item => (
-                  <div key={item.id} className={`${styles.wallItem} glass-panel`}>
-                    <div className={styles.wallItemHeader}>
-                      <div className={styles.wallSender}>
-                        <div className={styles.wallAvatar} style={{ background: item.color }}></div>
-                        <span className={styles.wallSenderName}>{item.sender}</span>
-                      </div>
-                      <div className={styles.wallAmount}>+${item.amount}</div>
-                    </div>
-                    {item.message && <p className={styles.wallMessage}>"{item.message}"</p>}
-                    <div className={styles.wallTime}>{item.time}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+      <div className={phaseStyles.container}>
+        <div className={phaseStyles.header}>
+          <h1 className={phaseStyles.title}>@{clean}</h1>
+          <p className={phaseStyles.subtitle}>Public profile on Epos.</p>
         </div>
 
-        <p className={styles.footer}>
-          Powered by <Link href="/" className={styles.footerLink}>Epos</Link>. The Onchain Payment Protocol.
-        </p>
+        <div className={phaseStyles.gridTwo}>
+          <div className={phaseStyles.stack}>
+            <div className={phaseStyles.card}>
+              <h2 className={phaseStyles.strong}>Profile Stats</h2>
+              <div className={phaseStyles.requestList} style={{ marginTop: "0.75rem" }}>
+                <div className={phaseStyles.requestItem}>
+                  <p className={phaseStyles.muted}>Requests created</p>
+                  <p className={phaseStyles.strong}>{userRequests.length}</p>
+                </div>
+                <div className={phaseStyles.requestItem}>
+                  <p className={phaseStyles.muted}>Total received</p>
+                  <p className={phaseStyles.strong}>{totalReceived} USDC</p>
+                </div>
+                <div className={phaseStyles.requestItem}>
+                  <p className={phaseStyles.muted}>Open right now</p>
+                  <p className={phaseStyles.strong}>{openRequests.length}</p>
+                </div>
+              </div>
+            </div>
+
+            {openRequests.length > 0 && (
+              <div className={phaseStyles.card}>
+                <h2 className={phaseStyles.strong}>Support @{clean}</h2>
+                <div className={phaseStyles.requestList} style={{ marginTop: "0.75rem" }}>
+                  {openRequests.map((item) => (
+                    <div key={item.id} className={phaseStyles.requestItem}>
+                      <p className={phaseStyles.strong}>{item.amount} USDC</p>
+                      <p>{item.reason}</p>
+                      <Link href={`/pay/${item.slug}`}>
+                        <Button>Epos Them</Button>
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className={phaseStyles.stack}>
+            <div className={phaseStyles.card}>
+              <h2 className={phaseStyles.strong}>Request History</h2>
+              {userRequests.length === 0 && (
+                <div className={phaseStyles.empty} style={{ marginTop: "0.75rem" }}>
+                  No requests found for this handle yet.
+                </div>
+              )}
+              {userRequests.length > 0 && (
+                <div className={phaseStyles.requestList} style={{ marginTop: "0.75rem" }}>
+                  {userRequests.map((item) => (
+                    <div key={item.id} className={phaseStyles.requestItem}>
+                      <div className={phaseStyles.requestHead}>
+                        <span className={phaseStyles.strong}>{item.amount} USDC</span>
+                        <span
+                          className={`${phaseStyles.pill} ${
+                            item.status === "open" ? phaseStyles.badgeOpen : phaseStyles.badgeDone
+                          }`}
+                        >
+                          {item.status}
+                        </span>
+                      </div>
+                      <p>{item.reason}</p>
+                      {item.status === "fulfilled" && (
+                        <p className={phaseStyles.muted}>Fulfilled by {item.fulfilledBy}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {isOwner && (
+              <Link href="/dashboard">
+                <Button variant="secondary">Create New Request</Button>
+              </Link>
+            )}
+          </div>
+        </div>
       </div>
     </AppLayout>
   );

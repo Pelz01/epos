@@ -1,67 +1,114 @@
 "use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import styles from './Claim.module.css';
-import { Button } from '@/components/ui/Button';
+import React, { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/Button";
+import { useEpos } from "@/components/epos/EposProvider";
+import AppLayout from "@/components/layout/AppLayout";
+import phaseStyles from "@/components/epos/Phase1.module.css";
 
 export default function ClaimPage() {
-  const [handle, setHandle] = useState('');
+  const router = useRouter();
+  const { authConfigured, currentUser, login, claimUsername } = useEpos();
+  const [username, setUsername] = useState("");
+  const [message, setMessage] = useState("");
+  const [tone, setTone] = useState<"ok" | "error">("ok");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Mock validation logic
-  const isTooShort = handle.length > 0 && handle.length < 3;
-  const isTaken = handle.toLowerCase() === 'sarahm' || handle.toLowerCase() === 'davido';
-  const isAvailable = handle.length >= 3 && !isTaken;
+  const handleSignIn = () => {
+    const result = login();
+    if (!result.ok) {
+      setTone("error");
+      setMessage(result.message || "Sign in failed.");
+      return;
+    }
+    setTone("ok");
+    setMessage("Complete the email sign-in in Privy.");
+  };
 
-  return (
-    <div className={styles.pageContainer}>
-      <div className={styles.card}>
-        <div className={styles.iconWrapper}>
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
-        </div>
-        
-        <h1 className={styles.title}>Claim Your Identity</h1>
-        <p className={styles.subtitle}>
-          Your Epos handle is your permanent onchain identity. No bank or fintech app can take it away.
-        </p>
+  const handleClaim = async (event?: React.FormEvent<HTMLFormElement>) => {
+    event?.preventDefault();
+    setIsSubmitting(true);
+    setTone("ok");
+    setMessage("Confirm the Base Sepolia transaction in Privy.");
+    const result = await claimUsername(username);
+    setIsSubmitting(false);
+    if (!result.ok) {
+      setTone("error");
+      setMessage(result.message || "Could not claim username.");
+      return;
+    }
+    setTone("ok");
+    setMessage(`@${username.replace(/^@+/, "")} claimed. Opening dashboard.`);
+    router.push("/dashboard");
+  };
 
-        <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
-          <div className={styles.inputWrapper}>
-            <span className={styles.atSymbol}>@</span>
-            <input 
-              type="text" 
-              className={styles.input} 
-              placeholder="username" 
-              value={handle}
-              onChange={(e) => setHandle(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))}
-              maxLength={15}
-            />
-          </div>
+  const content = (
+    <div className={phaseStyles.container}>
+      <div className={phaseStyles.card}>
+        <div className={phaseStyles.stack}>
+          <h1 className={phaseStyles.title}>Claim your Epos handle</h1>
+          <p className={phaseStyles.subtitle}>
+            Sign in first, then register your unique @username for your profile link.
+          </p>
 
-          {handle.length > 0 && (
-            <div className={`${styles.status} ${isAvailable ? styles.statusAvailable : styles.statusTaken}`}>
-              {isTooShort && "Handle must be at least 3 characters."}
-              {isTaken && "This handle is already taken."}
-              {isAvailable && "This handle is available!"}
+          {!currentUser && (
+            <div className={phaseStyles.stack}>
+              {!authConfigured && (
+                <div className={`${phaseStyles.status} ${phaseStyles.statusError}`}>
+                  Set NEXT_PUBLIC_PRIVY_APP_ID before sign-in can work.
+                </div>
+              )}
+              <Button onClick={handleSignIn}>Continue with Email</Button>
             </div>
           )}
 
-          <Button 
-            variant="primary" 
-            style={{ width: '100%', padding: '1.25rem', fontSize: '1.125rem' }}
-            disabled={!isAvailable}
-          >
-            Mint Handle on Base
-          </Button>
-        </form>
+          {currentUser?.username && (
+            <div className={phaseStyles.stack}>
+              <div className={`${phaseStyles.status} ${phaseStyles.statusOk}`}>
+                You already claimed @{currentUser.username}.
+              </div>
+              <Link href="/dashboard" className={phaseStyles.linkText}>
+                Go to dashboard
+              </Link>
+            </div>
+          )}
 
-        <div className={styles.footer}>
-          Already have an account? <Link href="/dashboard">Go to Dashboard</Link>
+          {currentUser && !currentUser.username && (
+            <form className={phaseStyles.stack} onSubmit={handleClaim}>
+              <div>
+                <label className={phaseStyles.label}>Username</label>
+                <input
+                  className={phaseStyles.input}
+                  placeholder="pelz"
+                  maxLength={15}
+                  value={username}
+                  onChange={(event) => setUsername(event.target.value.replace(/^@+/, "").toLowerCase())}
+                />
+              </div>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Claiming..." : "Claim Handle"}
+              </Button>
+              <Link href="/dashboard" className={phaseStyles.linkText}>
+                Go to dashboard
+              </Link>
+            </form>
+          )}
+
+          {message && (
+            <div className={`${phaseStyles.status} ${tone === "ok" ? phaseStyles.statusOk : phaseStyles.statusError}`}>
+              {message}
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
+
+  if (currentUser) {
+    return <AppLayout>{content}</AppLayout>;
+  }
+
+  return content;
 }

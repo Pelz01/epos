@@ -46,7 +46,7 @@ export function Features() {
             </div>
             <h3 className={styles.cardTitle}>No Agent Fees</h3>
             <p className={styles.cardDesc}>
-              Skip the POS machine charges and bank transfer fees. With Epos on Base L2, receiving money is virtually free. You keep 100% of what you're sent.
+              Skip the POS machine charges and bank transfer fees. With Epos on Base L2, receiving money is virtually free. You keep 100% of what you&apos;re sent.
             </p>
           </div>
 
@@ -61,7 +61,7 @@ export function Features() {
             </div>
             <h3 className={styles.cardTitle}>Built for the Culture</h3>
             <p className={styles.cardDesc}>
-              Epos isn't built for bankers, it's built for you. From students needing urgent funds to creators collecting tips—this is social finance.
+              Epos isn&apos;t built for bankers, it&apos;s built for you. From students needing urgent funds to creators collecting tips—this is social finance.
             </p>
           </div>
         </div>

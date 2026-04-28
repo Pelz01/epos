@@ -1,9 +1,10 @@
 "use client";
 
-import React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import styles from './AppLayout.module.css';
+import React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import styles from "./AppLayout.module.css";
+import { useEpos } from "@/components/epos/EposProvider";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -11,6 +12,12 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children }: AppLayoutProps) {
   const pathname = usePathname();
+  const { currentUser, receipts } = useEpos();
+  const profileHref = currentUser?.username ? `/${currentUser.username}` : currentUser ? "/dashboard" : "/claim";
+  const profileActive = currentUser?.username ? pathname === `/${currentUser.username}` : pathname === "/claim";
+  const profileLabel = currentUser?.username ? "Public Profile" : "Finish Setup";
+  const fulfilledCount = receipts.filter((item) => item.from === (currentUser?.username ? `@${currentUser.username}` : currentUser?.displayName)).length;
+  const progress = Math.min(100, fulfilledCount * 20);
 
   return (
     <div className={styles.pageContainer}>
@@ -37,23 +44,25 @@ export default function AppLayout({ children }: AppLayoutProps) {
               Live Feed
             </Link>
             <Link 
-              href="/johndoe" 
-              className={`${styles.navItem} ${pathname === '/johndoe' ? styles.navItemActive : ''}`}
+              href={profileHref}
+              className={`${styles.navItem} ${profileActive ? styles.navItemActive : ''}`}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-              Public Profile
+              {profileLabel}
             </Link>
           </nav>
         </div>
 
         <div className={styles.sidebarBottom}>
           <div className={styles.ogaCard}>
-            <div className={styles.ogaBadge}>Level 3 Oga</div>
+            <div className={styles.ogaBadge}>Phase 1 MVP</div>
             <h3 className={styles.ogaTitle}>Generosity Status</h3>
             <div className={styles.ogaProgressWrapper}>
-              <div className={styles.ogaProgressBar} style={{ width: '65%' }}></div>
+              <div className={styles.ogaProgressBar} style={{ width: `${progress}%` }}></div>
             </div>
-            <p className={styles.ogaDesc}>$35 away from Level 4. Epose someone to rank up!</p>
+            <p className={styles.ogaDesc}>
+              {fulfilledCount} request{fulfilledCount === 1 ? "" : "s"} fulfilled. Keep eposing people.
+            </p>
           </div>
         </div>
       </aside>
@@ -61,6 +70,27 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <main className={styles.main}>
         {children}
       </main>
+
+      <nav className={styles.mobileNav} aria-label="Mobile navigation">
+        <Link
+          href="/dashboard"
+          className={`${styles.mobileNavItem} ${pathname === "/dashboard" ? styles.mobileNavItemActive : ""}`}
+        >
+          <span>Home</span>
+        </Link>
+        <Link
+          href="/feed"
+          className={`${styles.mobileNavItem} ${pathname === "/feed" ? styles.mobileNavItemActive : ""}`}
+        >
+          <span>Feed</span>
+        </Link>
+        <Link
+          href={profileHref}
+          className={`${styles.mobileNavItem} ${profileActive ? styles.mobileNavItemActive : ""}`}
+        >
+          <span>{currentUser?.username ? "Profile" : "Setup"}</span>
+        </Link>
+      </nav>
     </div>
   );
 }

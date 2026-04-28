@@ -17,7 +17,7 @@ export function Hero() {
           
           <p className={styles.subtitle}>
             Send a request. Get paid in seconds. No bank. No fees. No wahala. 
-            Epos is the social payment layer built for Nigeria's informal economy.
+            Epos is the social payment layer built for Nigeria&apos;s informal economy.
           </p>
           
           <div className={styles.actions}>

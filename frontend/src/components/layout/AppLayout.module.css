@@ -155,8 +155,51 @@
   min-width: 0; /* Important for preventing flex children from overflowing */
 }
 
+.mobileNav {
+  display: none;
+}
+
 @media (max-width: 1024px) {
   .sidebar {
     display: none;
+  }
+
+  .pageContainer {
+    padding-bottom: 5rem;
+  }
+
+  .mobileNav {
+    position: fixed;
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 60;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.35rem;
+    padding: 0.4rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 12px 36px rgba(17, 24, 39, 0.12);
+  }
+
+  .mobileNavItem {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    border-radius: 999px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  .mobileNavItemActive {
+    background: var(--primary);
+    color: #ffffff;
+    box-shadow: 0 6px 18px var(--primary-glow);
   }
 }

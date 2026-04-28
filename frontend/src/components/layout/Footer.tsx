@@ -13,7 +13,7 @@ export function Footer() {
               Epos
             </Link>
             <p className={styles.tagline}>
-              The social payment layer for Nigeria's informal economy. Send a request, get paid in seconds.
+              The social payment layer for Nigeria&apos;s informal economy. Send a request, get paid in seconds.
             </p>
           </div>
           

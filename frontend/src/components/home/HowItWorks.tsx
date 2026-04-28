@@ -8,7 +8,7 @@ export function HowItWorks() {
         <div className={styles.header}>
           <h2 className={styles.title}>How It Works</h2>
           <p className={styles.subtitle}>
-            Getting paid shouldn't feel like filling out a tax form. Epos is built for the culture—fast, simple, and social.
+            Getting paid shouldn&apos;t feel like filling out a tax form. Epos is built for the culture—fast, simple, and social.
           </p>
         </div>
 
@@ -22,7 +22,7 @@ export function HowItWorks() {
             </div>
             <h3 className={styles.stepTitle}>1. Create a Request</h3>
             <p className={styles.stepDesc}>
-              Set an amount and tell them what it's for. Whether it's data subscription, transport fare, or just weekend vibes. Keep it casual.
+              Set an amount and tell them what it&apos;s for. Whether it&apos;s data subscription, transport fare, or just weekend vibes. Keep it casual.
             </p>
           </div>
 

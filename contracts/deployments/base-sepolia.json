@@ -1,0 +1,9 @@
+{
+  "network": "baseSepolia",
+  "chainId": 84532,
+  "deploymentBlock": 40817974,
+  "usdc": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+  "eposProfiles": "0xed4752f0A3dcd8667Da4d6d14E03097B1CD74456",
+  "eposReputation": "0xCa56e10B7e273d5f0461249f973987B1d89f4234",
+  "eposRequests": "0x55853601239D4d71858c8c9a8275f22E1Bd7A0ED"
+}
