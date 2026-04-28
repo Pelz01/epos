@@ -44,22 +44,32 @@ export default function ClaimPage() {
     router.push("/dashboard");
   };
 
-  const content = (
-    <div className={phaseStyles.container}>
-      <div className={phaseStyles.card}>
-        <div className={phaseStyles.stack}>
-          <h1 className={phaseStyles.title}>Claim your Epos handle</h1>
-          <p className={phaseStyles.subtitle}>
-            Sign in first, then register your unique @username for your profile link.
+  return (
+    <AppLayout>
+      <div className={phaseStyles.container} style={{ maxWidth: "480px", margin: "0 auto", padding: "3rem 1.25rem" }}>
+        <div className={`${phaseStyles.card} ${phaseStyles.animateIn}`} style={{ padding: "2.5rem 2rem", textAlign: "center" }}>
+          <div style={{ width: "48px", height: "48px", borderRadius: "14px", background: "linear-gradient(135deg, var(--primary), var(--accent))", margin: "0 auto 1.25rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </div>
+
+          <h1 style={{ fontSize: "1.5rem", fontWeight: 700, letterSpacing: "-0.02em", marginBottom: "0.5rem" }}>
+            Claim your handle
+          </h1>
+          <p className={phaseStyles.muted} style={{ marginBottom: "1.75rem", maxWidth: "320px", margin: "0 auto 1.75rem" }}>
+            Your @handle is your permanent payment identity onchain. People will pay you at epos.xyz/@you.
           </p>
 
           {!currentUser && (
-            <div className={phaseStyles.stack}>
+            <div className={phaseStyles.stack} style={{ textAlign: "left" }}>
               {!authConfigured && (
                 <div className={`${phaseStyles.status} ${phaseStyles.statusError}`}>
                   Set NEXT_PUBLIC_PRIVY_APP_ID before sign-in can work.
                 </div>
               )}
+              <p className={phaseStyles.muted} style={{ textAlign: "center" }}>Sign in first, then pick your username.</p>
               <Button onClick={handleSignIn}>Continue with Email</Button>
             </div>
           )}
@@ -67,21 +77,21 @@ export default function ClaimPage() {
           {currentUser?.username && (
             <div className={phaseStyles.stack}>
               <div className={`${phaseStyles.status} ${phaseStyles.statusOk}`}>
-                You already claimed @{currentUser.username}.
+                You already claimed @{currentUser.username}. You&apos;re all set.
               </div>
-              <Link href="/dashboard" className={phaseStyles.linkText}>
-                Go to dashboard
+              <Link href="/dashboard">
+                <Button variant="secondary">Go to Dashboard</Button>
               </Link>
             </div>
           )}
 
           {currentUser && !currentUser.username && (
-            <form className={phaseStyles.stack} onSubmit={handleClaim}>
+            <form className={phaseStyles.stack} onSubmit={handleClaim} style={{ textAlign: "left" }}>
               <div>
-                <label className={phaseStyles.label}>Username</label>
+                <label className={phaseStyles.label}>Choose your username</label>
                 <input
                   className={phaseStyles.input}
-                  placeholder="pelz"
+                  placeholder="tunde"
                   maxLength={15}
                   value={username}
                   onChange={(event) => setUsername(event.target.value.replace(/^@+/, "").toLowerCase())}
@@ -90,25 +100,19 @@ export default function ClaimPage() {
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "Claiming..." : "Claim Handle"}
               </Button>
-              <Link href="/dashboard" className={phaseStyles.linkText}>
-                Go to dashboard
+              <Link href="/dashboard" style={{ textAlign: "center" }}>
+                <span className={phaseStyles.linkText}>Skip for now → Dashboard</span>
               </Link>
             </form>
           )}
 
           {message && (
-            <div className={`${phaseStyles.status} ${tone === "ok" ? phaseStyles.statusOk : phaseStyles.statusError}`}>
+            <div className={`${phaseStyles.status} ${tone === "ok" ? phaseStyles.statusOk : phaseStyles.statusError}`} style={{ marginTop: "1rem" }}>
               {message}
             </div>
           )}
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
-
-  if (currentUser) {
-    return <AppLayout>{content}</AppLayout>;
-  }
-
-  return content;
 }

@@ -171,7 +171,7 @@ export default function DashboardPage() {
     if (!currentUser?.username || typeof window === "undefined") {
       return;
     }
-    copyText(`${window.location.origin}/${currentUser.username}`, "Profile link copied.");
+    copyText(`${window.location.origin}/${currentUser.username}`, "Profile link copied — share it anywhere.");
   };
 
   const copyRequestLink = (slug: string) => {
@@ -183,22 +183,33 @@ export default function DashboardPage() {
   return (
     <AppLayout>
       <div className={phaseStyles.container}>
-        <div className={phaseStyles.header}>
-          <h1 className={phaseStyles.title}>Phase 1 Dashboard</h1>
-          <p className={phaseStyles.subtitle}>
-            Sign in, claim your handle, create a request, and share your payment link.
-          </p>
-        </div>
+        {/* ── Loading State ── */}
+        {!authReady && (
+          <div className={`${phaseStyles.card} ${phaseStyles.animateIn}`} style={{ textAlign: "center", padding: "3rem 2rem" }}>
+            <div style={{ marginBottom: "1rem" }}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: "spin 1.5s linear infinite" }}>
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+              </svg>
+            </div>
+            <p style={{ fontWeight: 600, fontSize: "1.05rem", color: "var(--foreground)" }}>Setting up your Epos...</p>
+            <p className={phaseStyles.muted} style={{ marginTop: "0.35rem" }}>This only takes a moment.</p>
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          </div>
+        )}
 
-        {!authReady && <div className={`${phaseStyles.card} ${phaseStyles.muted}`}>Loading your session...</div>}
-
+        {/* ── Sign In State ── */}
         {authReady && !currentUser && (
-          <div className={`${phaseStyles.card} ${phaseStyles.stack}`}>
-            <h2 className={phaseStyles.strong}>Sign In</h2>
-            <p className={phaseStyles.muted}>Sign in with email. Privy creates the wallet in the background.</p>
+          <div className={`${phaseStyles.card} ${phaseStyles.animateIn}`} style={{ textAlign: "center", padding: "3rem 2rem", maxWidth: "480px", margin: "2rem auto" }}>
+            <div style={{ width: "48px", height: "48px", borderRadius: "14px", background: "linear-gradient(135deg, var(--primary), var(--secondary))", margin: "0 auto 1.25rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" /></svg>
+            </div>
+            <h2 style={{ fontSize: "1.5rem", fontWeight: 700, letterSpacing: "-0.02em", marginBottom: "0.5rem" }}>Welcome to Epos</h2>
+            <p className={phaseStyles.muted} style={{ marginBottom: "1.5rem", maxWidth: "320px", margin: "0 auto 1.5rem" }}>
+              Sign in to create payment requests, claim your handle, and start getting paid onchain.
+            </p>
 
             {!authConfigured && (
-              <div className={`${phaseStyles.status} ${phaseStyles.statusError}`}>
+              <div className={`${phaseStyles.status} ${phaseStyles.statusError}`} style={{ marginBottom: "1rem" }}>
                 Set NEXT_PUBLIC_PRIVY_APP_ID before sign-in can work.
               </div>
             )}
@@ -206,18 +217,50 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* ── Authenticated State ── */}
         {authReady && currentUser && (
           <div className={phaseStyles.stack}>
-            <div className={`${phaseStyles.card} ${phaseStyles.setupCard}`}>
+            {/* ── Welcome Header ── */}
+            <div className={phaseStyles.header}>
+              <h1 className={phaseStyles.title}>
+                {currentUser.username ? `Hey @${currentUser.username} 👋` : "Welcome to Epos"}
+              </h1>
+              <p className={phaseStyles.subtitle}>
+                {currentUser.username
+                  ? "Create a request and share the link to get paid."
+                  : "Claim your handle to unlock your public profile and start receiving."}
+              </p>
+            </div>
+
+            {/* ── Profile Link Card (if username exists) ── */}
+            {currentUser.username && (
+              <div className={`${phaseStyles.card} ${phaseStyles.animateIn}`} style={{ background: "linear-gradient(135deg, rgba(37,99,235,0.04), rgba(124,58,237,0.04))" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.75rem" }}>
+                  <div>
+                    <p className={phaseStyles.muted} style={{ fontSize: "0.82rem", marginBottom: "0.25rem" }}>Your public profile</p>
+                    <p style={{ fontWeight: 700, fontSize: "1.1rem" }}>epos.xyz/@{currentUser.username}</p>
+                  </div>
+                  <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                    <Button variant="primary" onClick={copyProfile}>Copy Profile Link</Button>
+                    <Link href={`/${currentUser.username}`}>
+                      <Button variant="secondary">View Profile</Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── Account Card ── */}
+            <div className={`${phaseStyles.card} ${phaseStyles.setupCard} ${phaseStyles.animateIn}`}>
               <div className={phaseStyles.setupHero}>
                 <div>
                   <h2 className={phaseStyles.setupTitle}>
-                    {currentUser.username ? `Welcome @${currentUser.username}` : "Finish setup"}
+                    {currentUser.username ? "Account" : "Claim your handle"}
                   </h2>
                   <p className={phaseStyles.setupCopy}>
                     {currentUser.username
-                      ? "Your Epos profile is ready. Create a request and share the link."
-                      : "Choose the handle people will use to find and pay you."}
+                      ? "Your wallet and balances on Base Sepolia."
+                      : "Choose the @handle people will use to find and pay you."}
                   </p>
                 </div>
                 <span className={phaseStyles.networkPill}>Base Sepolia</span>
@@ -262,11 +305,6 @@ export default function DashboardPage() {
                   >
                     Copy Wallet
                   </Button>
-                  {currentUser.username && (
-                    <Button variant="ghost" className={phaseStyles.compactButton} onClick={copyProfile}>
-                      Copy Profile
-                    </Button>
-                  )}
                   <Button variant="ghost" className={phaseStyles.compactButton} onClick={logout}>
                     Sign Out
                   </Button>
@@ -276,10 +314,10 @@ export default function DashboardPage() {
               {!currentUser.username && (
                 <form className={phaseStyles.stack} onSubmit={handleClaim}>
                   <div>
-                    <label className={phaseStyles.label}>Claim username</label>
+                    <label className={phaseStyles.label}>Username</label>
                     <input
                       className={phaseStyles.input}
-                      placeholder="pelz"
+                      placeholder="tunde"
                       value={username}
                       onChange={(event) => setUsername(event.target.value.replace(/^@+/, "").toLowerCase())}
                       maxLength={15}
@@ -292,9 +330,10 @@ export default function DashboardPage() {
               )}
             </div>
 
+            {/* ── Create Request + Profile ── */}
             {currentUser.username && (
               <div className={phaseStyles.gridTwo}>
-                <div className={`${phaseStyles.card} ${phaseStyles.stack}`}>
+                <div className={`${phaseStyles.card} ${phaseStyles.stack} ${phaseStyles.animateIn}`}>
                   <h3 className={phaseStyles.strong}>Create Epos Request</h3>
                   <div>
                     <label className={phaseStyles.label}>Amount (USDC)</label>
@@ -310,7 +349,7 @@ export default function DashboardPage() {
                     <label className={phaseStyles.label}>Reason</label>
                     <textarea
                       className={phaseStyles.textarea}
-                      placeholder="School fees abeg"
+                      placeholder="School fees abeg 🙏"
                       value={reason}
                       onChange={(event) => setReason(event.target.value)}
                     />
@@ -334,10 +373,10 @@ export default function DashboardPage() {
                   )}
                 </div>
 
-                <div className={`${phaseStyles.card} ${phaseStyles.stack}`}>
-                  <h3 className={phaseStyles.strong}>Your Profile</h3>
+                <div className={`${phaseStyles.card} ${phaseStyles.stack} ${phaseStyles.animateIn}`}>
+                  <h3 className={phaseStyles.strong}>Quick Info</h3>
                   <p className={phaseStyles.muted}>
-                    Feed source: Base Sepolia events {isFeedLoading ? "(refreshing)" : "(synced)"}
+                    Feed: {isFeedLoading ? "syncing..." : "up to date"} · Base Sepolia
                   </p>
                   {feedError && <div className={`${phaseStyles.status} ${phaseStyles.statusError}`}>{feedError}</div>}
                   <Button variant="secondary" onClick={refreshOnchainData} disabled={isFeedLoading}>
@@ -354,11 +393,12 @@ export default function DashboardPage() {
               </div>
             )}
 
+            {/* ── Request History ── */}
             {currentUser.username && (
-              <div className={`${phaseStyles.card} ${phaseStyles.stack}`}>
+              <div className={`${phaseStyles.card} ${phaseStyles.stack} ${phaseStyles.animateIn}`}>
                 <h3 className={phaseStyles.strong}>Your Requests</h3>
                 {userRequests.length === 0 && (
-                  <div className={phaseStyles.empty}>No request yet. Create your first link above.</div>
+                  <div className={phaseStyles.empty}>No requests yet. Create your first link above.</div>
                 )}
                 {userRequests.length > 0 && (
                   <div className={phaseStyles.requestList}>
@@ -393,6 +433,7 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* ── Status Message ── */}
         {message && (
           <div
             className={`${phaseStyles.status} ${tone === "ok" ? phaseStyles.statusOk : phaseStyles.statusError}`}

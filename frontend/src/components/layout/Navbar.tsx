@@ -9,7 +9,7 @@ import { useEpos } from "@/components/epos/EposProvider";
 export function Navbar() {
   const { currentUser } = useEpos();
   const profileHref = currentUser?.username ? `/${currentUser.username}` : "/claim";
-  const actionHref = currentUser ? "/dashboard" : "/claim";
+  const actionHref = currentUser ? "/dashboard" : "/signin";
   const actionLabel = currentUser ? "Dashboard" : "Sign In";
 
   return (

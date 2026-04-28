@@ -5,33 +5,47 @@
 }
 
 .header {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.75rem;
+  animation: phaseSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .title {
   font-size: clamp(1.5rem, 2.4vw, 2.1rem);
   line-height: 1.2;
   font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .subtitle {
   margin-top: 0.4rem;
   color: var(--text-muted);
   font-size: 0.98rem;
+  line-height: 1.5;
 }
 
+/* ── Cards ── */
 .card {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--glass-border);
-  border-radius: 16px;
-  padding: 1.25rem;
+  border-radius: 20px;
+  padding: 1.5rem;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
+.card:hover {
+  border-color: var(--glass-border-hover);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+/* ── Setup Card ── */
 .setupCard {
   display: grid;
   gap: 1.1rem;
-  padding: clamp(1rem, 3vw, 1.4rem);
-  background: #ffffff;
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+  background: rgba(255, 255, 255, 0.92);
   border-color: var(--glass-border);
 }
 
@@ -69,6 +83,7 @@
   text-transform: uppercase;
 }
 
+/* ── Account Panel ── */
 .accountPanel {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
@@ -79,10 +94,10 @@
 .identityGrid,
 .balanceGrid,
 .setupActions {
-  border: 1px solid #e5e7eb;
-  background: #f9fafb;
-  border-radius: 18px;
-  padding: 0.7rem;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: var(--surface, #f8fafc);
+  border-radius: 16px;
+  padding: 0.75rem;
 }
 
 .identityGrid {
@@ -138,6 +153,7 @@
   flex-wrap: wrap;
 }
 
+/* ── Layout ── */
 .stack {
   display: grid;
   gap: 1rem;
@@ -155,6 +171,7 @@
   }
 }
 
+/* ── Forms ── */
 .label {
   display: block;
   margin-bottom: 0.35rem;
@@ -166,11 +183,21 @@
 .textarea,
 .select {
   width: 100%;
-  border: 1px solid #d1d5db;
-  border-radius: 10px;
-  padding: 0.7rem 0.8rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 0.75rem 0.9rem;
   font: inherit;
+  background: rgba(255, 255, 255, 0.6);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.input:focus,
+.textarea:focus,
+.select:focus {
+  border-color: var(--primary);
   background: #ffffff;
+  box-shadow: 0 0 0 3px var(--primary-glow);
 }
 
 .textarea {
@@ -184,30 +211,34 @@
   flex-wrap: wrap;
 }
 
+/* ── Status Messages ── */
 .status {
-  border-radius: 10px;
-  padding: 0.65rem 0.8rem;
-  font-size: 0.9rem;
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+  line-height: 1.45;
 }
 
 .statusOk {
-  background: #ecfdf3;
-  border: 1px solid #9ee9c2;
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  border: 1px solid #86efac;
   color: #166534;
 }
 
 .statusWarn {
-  background: #fff7ed;
-  border: 1px solid #f8c697;
-  color: #9a3412;
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+  border: 1px solid #fcd34d;
+  color: #92400e;
 }
 
 .statusError {
-  background: #fff1f2;
-  border: 1px solid #f8b4be;
+  background: linear-gradient(135deg, #fff1f2, #ffe4e6);
+  border: 1px solid #fca5b0;
   color: #9f1239;
 }
 
+/* ── Pills / Badges ── */
 .pill {
   display: inline-flex;
   align-items: center;
@@ -215,20 +246,42 @@
   border-radius: 999px;
   padding: 0.3rem 0.65rem;
   font-size: 0.78rem;
-  border: 1px solid #d1d5db;
+  font-weight: 600;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.6);
 }
 
+.badgeOpen {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border: 1px solid #93c5fd;
+  color: #1d4ed8;
+}
+
+.badgeDone {
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  border: 1px solid #86efac;
+  color: #166534;
+}
+
+/* ── Request List ── */
 .requestList {
   display: grid;
   gap: 0.75rem;
 }
 
 .requestItem {
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 0.85rem;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  padding: 1rem;
   display: grid;
   gap: 0.6rem;
+  background: var(--surface, #f8fafc);
+  transition: all 0.2s ease;
+}
+
+.requestItem:hover {
+  border-color: rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .requestHead {
@@ -247,6 +300,7 @@
   white-space: nowrap;
 }
 
+/* ── Typography Utilities ── */
 .muted {
   color: var(--text-muted);
   font-size: 0.9rem;
@@ -256,19 +310,29 @@
   font-weight: 700;
 }
 
+.mini {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
 .linkText {
   color: var(--primary);
   text-decoration: underline;
   text-underline-offset: 2px;
+  font-weight: 500;
+}
+
+.linkText:hover {
+  color: var(--secondary);
 }
 
 .codeText {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
   font-size: 0.85rem;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 0.45rem 0.6rem;
+  background: var(--surface, #f8fafc);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+  padding: 0.5rem 0.7rem;
   overflow-wrap: anywhere;
 }
 
@@ -279,29 +343,56 @@
   align-items: center;
 }
 
-.badgeOpen {
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  color: #1d4ed8;
-}
-
-.badgeDone {
-  background: #ecfdf3;
-  border: 1px solid #9ee9c2;
-  color: #166534;
-}
-
-.mini {
-  font-size: 0.82rem;
-}
-
 .empty {
-  border: 1px dashed #cbd5e1;
-  border-radius: 12px;
-  padding: 1rem;
+  border: 1px dashed rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
   color: var(--text-muted);
+  text-align: center;
+  font-size: 0.92rem;
 }
 
+/* ── Loading Skeleton ── */
+.skeleton {
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 200% 100%;
+  animation: phaseShimmer 2s linear infinite;
+  border-radius: 10px;
+}
+
+@keyframes phaseShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeletonText {
+  height: 14px;
+  width: 60%;
+  margin-bottom: 0.5rem;
+}
+
+.skeletonBlock {
+  height: 120px;
+  width: 100%;
+}
+
+/* ── Entrance Animation ── */
+@keyframes phaseSlideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animateIn {
+  animation: phaseSlideIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animateIn:nth-child(1) { animation-delay: 0ms; }
+.animateIn:nth-child(2) { animation-delay: 80ms; }
+.animateIn:nth-child(3) { animation-delay: 160ms; }
+.animateIn:nth-child(4) { animation-delay: 240ms; }
+.animateIn:nth-child(5) { animation-delay: 320ms; }
+
+/* ── Responsive ── */
 @media (max-width: 720px) {
   .container {
     padding: 1.25rem 1rem 2.5rem;
@@ -346,5 +437,10 @@
 
   .copyLine {
     grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 1.25rem;
+    border-radius: 16px;
   }
 }

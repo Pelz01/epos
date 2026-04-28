@@ -9,6 +9,12 @@
   --glass-border: rgba(0, 0, 0, 0.06);
   --glass-border-hover: rgba(0, 0, 0, 0.15);
   --text-muted: #6b7280;
+  --surface: #f8fafc;
+  --surface-raised: rgba(255, 255, 255, 0.92);
+  --success: #10b981;
+  --success-glow: rgba(16, 185, 129, 0.15);
+  --danger: #ef4444;
+  --warning: #f59e0b;
 }
 
 * {
@@ -66,3 +72,46 @@ a {
 .delay-200 { animation-delay: 200ms; }
 .delay-300 { animation-delay: 300ms; }
 .delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+.delay-600 { animation-delay: 600ms; }
+
+/* Skeleton pulse animation */
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.85; }
+}
+
+.skeleton-pulse {
+  animation: skeletonPulse 1.8s ease-in-out infinite;
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 200% 100%;
+  animation: skeletonPulse 1.8s ease-in-out infinite, skeletonShimmer 2.4s linear infinite;
+  border-radius: 8px;
+}
+
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Slide up entrance */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+/* Scale in entrance */
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
