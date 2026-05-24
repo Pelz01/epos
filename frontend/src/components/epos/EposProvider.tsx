@@ -52,6 +52,12 @@ export interface EposRequest {
   fulfilledBy: string | null;
   fulfilledAt: string | null;
   onchainRequestId?: string;
+  reactions?: {
+    pray: number;
+    watch: number;
+    support: number;
+  };
+  sapaDays?: number;
 }
 
 export interface EposReceipt {
@@ -112,6 +118,12 @@ interface EposContextValue {
   claimUsername: (username: string) => Promise<ActionResult>;
   createRequest: (input: CreateRequestInput) => Promise<CreateRequestResult>;
   payRequest: (slug: string) => Promise<PayRequestResult>;
+  // Gamification & Sandbox mode extensions
+  sandboxMode: boolean;
+  toggleSandboxMode: () => void;
+  mintMockTokens: () => void;
+  reactToRequest: (requestId: string, reactionType: "pray" | "watch" | "support") => void;
+  withdrawMockUsdc: (amount: number) => void;
 }
 
 const STORAGE_KEY = "epos.phase1.state.v2";
@@ -215,6 +227,145 @@ function EposStateProvider({ children }: { children: React.ReactNode }) {
   const walletAddress = getWalletAddress(user);
   const username = onchainUsername ?? (userId ? state.profiles[userId]?.username ?? null : null);
 
+  // ── Sandbox Mode States ──
+  const [sandboxMode, setSandboxMode] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("epos.sandbox.active");
+      return stored ? stored === "true" : false;
+    }
+    return false;
+  });
+
+  const [mockAuthenticated, setMockAuthenticated] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("epos.sandbox.authenticated") === "true";
+    }
+    return false;
+  });
+
+  const [mockUsername, setMockUsername] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("epos.sandbox.username");
+    }
+    return null;
+  });
+
+  const [mockBalances, setMockBalances] = useState<WalletBalances>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("epos.sandbox.balances");
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+    return { eth: 0.05, usdc: 100.0 };
+  });
+
+  const [reactionIncrements, setReactionIncrements] = useState<Record<string, { pray: number; watch: number; support: number }>>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("epos.sandbox.reactions");
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+    return {};
+  });
+
+  // Sync sandbox variables
+  useEffect(() => {
+    localStorage.setItem("epos.sandbox.active", String(sandboxMode));
+  }, [sandboxMode]);
+
+  useEffect(() => {
+    localStorage.setItem("epos.sandbox.authenticated", String(mockAuthenticated));
+  }, [mockAuthenticated]);
+
+  useEffect(() => {
+    if (mockUsername) {
+      localStorage.setItem("epos.sandbox.username", mockUsername);
+    } else {
+      localStorage.removeItem("epos.sandbox.username");
+    }
+  }, [mockUsername]);
+
+  useEffect(() => {
+    localStorage.setItem("epos.sandbox.balances", JSON.stringify(mockBalances));
+  }, [mockBalances]);
+
+  useEffect(() => {
+    localStorage.setItem("epos.sandbox.reactions", JSON.stringify(reactionIncrements));
+  }, [reactionIncrements]);
+
+  // Gamification helpers
+  const enrichRequest = useCallback((request: EposRequest): EposRequest => {
+    const reqId = request.id;
+    let idHash = 0;
+    for (let i = 0; i < reqId.length; i++) {
+      idHash += reqId.charCodeAt(i);
+    }
+    const initPray = (idHash % 7) + 2;
+    const initWatch = (idHash % 5) + 1;
+    const initSupport = (idHash % 9) + 3;
+
+    const incs = reactionIncrements[reqId] ?? { pray: 0, watch: 0, support: 0 };
+    
+    const created = new Date(request.createdAt);
+    const now = new Date();
+    const diffMs = now.getTime() - created.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const sapaDays = diffDays > 0 ? diffDays + 1 : (idHash % 4) + 1;
+
+    return {
+      ...request,
+      reactions: {
+        pray: initPray + incs.pray,
+        watch: initWatch + incs.watch,
+        support: initSupport + incs.support,
+      },
+      sapaDays,
+    };
+  }, [reactionIncrements]);
+
+  const reactToRequest = useCallback((requestId: string, reactionType: "pray" | "watch" | "support") => {
+    setReactionIncrements((prev) => {
+      const current = prev[requestId] ?? { pray: 0, watch: 0, support: 0 };
+      return {
+        ...prev,
+        [requestId]: {
+          ...current,
+          [reactionType]: current[reactionType] + 1,
+        },
+      };
+    });
+  }, []);
+
+  const mintMockTokens = useCallback(() => {
+    setMockBalances((prev) => ({
+      eth: Number((prev.eth + 0.05).toFixed(5)),
+      usdc: Number((prev.usdc + 100.0).toFixed(2)),
+    }));
+  }, []);
+
+  const withdrawMockUsdc = useCallback((amount: number) => {
+    if (sandboxMode) {
+      setMockBalances((prev) => ({
+        ...prev,
+        usdc: Number(Math.max(0, prev.usdc - amount).toFixed(2)),
+      }));
+    }
+  }, [sandboxMode]);
+
+  const toggleSandboxMode = useCallback(() => {
+    setSandboxMode((prev) => !prev);
+  }, []);
+
   const activeWallet = useMemo(
     () => wallets.find((wallet) => wallet.walletClientType === "privy") ?? wallets[0] ?? null,
     [wallets],
@@ -236,6 +387,9 @@ function EposStateProvider({ children }: { children: React.ReactNode }) {
   }, [activeWallet]);
 
   const refreshOnchainData = useCallback(async (): Promise<ActionResult> => {
+    if (sandboxMode) {
+      return { ok: true };
+    }
     setIsFeedLoading(true);
     setFeedError("");
     try {
@@ -276,9 +430,12 @@ function EposStateProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsFeedLoading(false);
     }
-  }, [setState]);
+  }, [setState, sandboxMode]);
 
   const refreshBalances = useCallback(async (): Promise<ActionResult> => {
+    if (sandboxMode) {
+      return { ok: true };
+    }
     if (!walletAddress) {
       setBalances(null);
       return { ok: false, message: "Sign in first." };
@@ -294,7 +451,7 @@ function EposStateProvider({ children }: { children: React.ReactNode }) {
       const message = friendlyContractError(error);
       return { ok: false, message };
     }
-  }, [walletAddress]);
+  }, [walletAddress, sandboxMode]);
 
   useEffect(() => {
     if (!isHydrated) {
@@ -314,6 +471,9 @@ function EposStateProvider({ children }: { children: React.ReactNode }) {
   }, [refreshBalances]);
 
   useEffect(() => {
+    if (sandboxMode) {
+      return;
+    }
     let cancelled = false;
     async function loadOnchainUsername() {
       if (!walletAddress || !isHydrated) {
@@ -350,9 +510,22 @@ function EposStateProvider({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [isHydrated, setState, userId, walletAddress]);
+  }, [isHydrated, setState, userId, walletAddress, sandboxMode]);
 
   const currentUser = useMemo<EposUser | null>(() => {
+    if (sandboxMode) {
+      if (!mockAuthenticated) {
+        return null;
+      }
+      return {
+        id: "sandbox-user",
+        identifier: "sandbox@epos.xyz",
+        displayName: mockUsername ? `@${mockUsername}` : "sandbox@epos.xyz",
+        walletAddress: "0xSandboxWalletAddressBaseSepolia",
+        username: mockUsername,
+      };
+    }
+
     if (!authenticated || !user) {
       return null;
     }
@@ -364,35 +537,61 @@ function EposStateProvider({ children }: { children: React.ReactNode }) {
       walletAddress,
       username,
     };
-  }, [authenticated, user, username, walletAddress]);
+  }, [authenticated, user, username, walletAddress, sandboxMode, mockAuthenticated, mockUsername]);
 
   const login = useCallback((): ActionResult => {
+    if (sandboxMode) {
+      setMockAuthenticated(true);
+      return { ok: true };
+    }
     if (!ready) {
       return { ok: false, message: "Privy is still loading." };
     }
     privyLogin({ loginMethods: ["email"] });
     return { ok: true };
-  }, [privyLogin, ready]);
+  }, [privyLogin, ready, sandboxMode]);
 
   const loginWithWallet = useCallback((): ActionResult => {
+    if (sandboxMode) {
+      setMockAuthenticated(true);
+      return { ok: true };
+    }
     if (!ready) {
       return { ok: false, message: "Privy is still loading." };
     }
     privyLogin({ loginMethods: ["wallet"] });
     return { ok: true };
-  }, [privyLogin, ready]);
+  }, [privyLogin, ready, sandboxMode]);
+
+  const logout = useCallback(async () => {
+    if (sandboxMode) {
+      setMockAuthenticated(false);
+      setMockUsername(null);
+      return;
+    }
+    await privyLogout();
+  }, [privyLogout, sandboxMode]);
 
   const claimUsername = useCallback(
     async (value: string): Promise<ActionResult> => {
+      const clean = normalizeUsername(value);
+      if (clean.length < 3 || clean.length > 15) {
+        return { ok: false, message: "Username must be 3-15 characters." };
+      }
+
+      if (sandboxMode) {
+        if (!mockAuthenticated) {
+          return { ok: false, message: "Sign in first." };
+        }
+        setMockUsername(clean);
+        return { ok: true };
+      }
+
       if (!userId) {
         return { ok: false, message: "Sign in first." };
       }
       if (!walletsReady) {
         return { ok: false, message: "Privy wallet is still loading." };
-      }
-      const clean = normalizeUsername(value);
-      if (clean.length < 3 || clean.length > 15) {
-        return { ok: false, message: "Username must be 3-15 characters." };
       }
 
       try {
@@ -425,7 +624,7 @@ function EposStateProvider({ children }: { children: React.ReactNode }) {
       await refreshBalances();
       return { ok: true };
     },
-    [getWalletProvider, refreshBalances, setState, userId, walletsReady],
+    [getWalletProvider, refreshBalances, setState, userId, walletsReady, sandboxMode, mockAuthenticated],
   );
 
   const createRequest = useCallback(
@@ -435,16 +634,40 @@ function EposStateProvider({ children }: { children: React.ReactNode }) {
       if (!currentUser?.username) {
         return { ok: false, message: "Claim your username first." };
       }
-      if (!walletsReady) {
-        return { ok: false, message: "Privy wallet is still loading." };
-      }
-      const claimedUsername = currentUser.username;
       if (!Number.isFinite(amount) || amount <= 0) {
         return { ok: false, message: "Enter a valid USDC amount." };
       }
       if (!reason) {
         return { ok: false, message: "Enter a reason for your request." };
       }
+
+      if (sandboxMode) {
+        const mockId = Math.floor(Math.random() * 1000000).toString();
+        const created: EposRequest = {
+          id: mockId,
+          slug: requestSlug(currentUser.username, reason, mockId),
+          username: currentUser.username,
+          amount,
+          reason,
+          createdAt: new Date().toISOString(),
+          status: "open",
+          fulfilledBy: null,
+          fulfilledAt: null,
+          onchainRequestId: mockId,
+        };
+        setState((prev) => {
+          return {
+            ...prev,
+            requests: [created, ...prev.requests],
+          };
+        });
+        return { ok: true, request: created };
+      }
+
+      if (!walletsReady) {
+        return { ok: false, message: "Privy wallet is still loading." };
+      }
+      const claimedUsername = currentUser.username;
 
       let onchainRequestId: bigint;
       try {
@@ -491,16 +714,13 @@ function EposStateProvider({ children }: { children: React.ReactNode }) {
       await refreshOnchainData();
       return { ok: true, request: created };
     },
-    [currentUser, getWalletProvider, refreshOnchainData, setState, walletsReady],
+    [currentUser, getWalletProvider, refreshOnchainData, setState, walletsReady, sandboxMode],
   );
 
   const payRequest = useCallback(
     async (slug: string): Promise<PayRequestResult> => {
       if (!currentUser) {
         return { ok: false, message: "Sign in first." };
-      }
-      if (!walletsReady) {
-        return { ok: false, message: "Privy wallet is still loading." };
       }
 
       const target = state.requests.find((request) => request.slug === slug);
@@ -512,6 +732,59 @@ function EposStateProvider({ children }: { children: React.ReactNode }) {
       }
       if (currentUser.username && currentUser.username === target.username) {
         return { ok: false, message: "You cannot fulfill your own request." };
+      }
+
+      if (sandboxMode) {
+        if (mockBalances.usdc < target.amount) {
+          return { ok: false, message: `Your sandbox wallet only has ${mockBalances.usdc.toFixed(2)} USDC.` };
+        }
+        if (mockBalances.eth <= 0) {
+          return { ok: false, message: "Your sandbox wallet needs ETH for gas." };
+        }
+
+        setMockBalances((prev) => ({
+          eth: Number((prev.eth - 0.001).toFixed(5)),
+          usdc: Number((prev.usdc - target.amount).toFixed(2)),
+        }));
+
+        let receipt: EposReceipt | undefined;
+        const now = new Date().toISOString();
+        const sender = currentUser.username ? `@${currentUser.username}` : currentUser.identifier;
+
+        setState((prev) => {
+          const index = prev.requests.findIndex((request) => request.slug === slug);
+          if (index === -1) return prev;
+          const targetReq = prev.requests[index];
+
+          const updatedRequests = [...prev.requests];
+          updatedRequests[index] = {
+            ...targetReq,
+            status: "fulfilled",
+            fulfilledBy: sender,
+            fulfilledAt: now,
+          };
+          receipt = {
+            id: generateId("receipt"),
+            requestId: targetReq.id,
+            slug: targetReq.slug,
+            from: sender,
+            to: `@${targetReq.username}`,
+            amount: targetReq.amount,
+            reason: targetReq.reason,
+            createdAt: now,
+          };
+          return {
+            ...prev,
+            requests: updatedRequests,
+            receipts: [receipt, ...prev.receipts],
+          };
+        });
+
+        return receipt ? { ok: true, receipt } : { ok: false, message: "Payment failed." };
+      }
+
+      if (!walletsReady) {
+        return { ok: false, message: "Privy wallet is still loading." };
       }
       if (!target.onchainRequestId) {
         return { ok: false, message: "This request is missing its onchain id." };
@@ -552,12 +825,12 @@ function EposStateProvider({ children }: { children: React.ReactNode }) {
           return prev;
         }
 
-        const target = prev.requests[index];
-        if (target.status === "fulfilled") {
+        const targetReq = prev.requests[index];
+        if (targetReq.status === "fulfilled") {
           message = "This request is already fulfilled.";
           return prev;
         }
-        if (currentUser.username && currentUser.username === target.username) {
+        if (currentUser.username && currentUser.username === targetReq.username) {
           message = "You cannot fulfill your own request.";
           return prev;
         }
@@ -566,19 +839,19 @@ function EposStateProvider({ children }: { children: React.ReactNode }) {
         const sender = currentUser.username ? `@${currentUser.username}` : currentUser.identifier;
         const updatedRequests = [...prev.requests];
         updatedRequests[index] = {
-          ...target,
+          ...targetReq,
           status: "fulfilled",
           fulfilledBy: sender,
           fulfilledAt: now,
         };
         receipt = {
           id: generateId("receipt"),
-          requestId: target.id,
-          slug: target.slug,
+          requestId: targetReq.id,
+          slug: targetReq.slug,
           from: sender,
-          to: `@${target.username}`,
-          amount: target.amount,
-          reason: target.reason,
+          to: `@${targetReq.username}`,
+          amount: targetReq.amount,
+          reason: targetReq.reason,
           createdAt: now,
         };
         return {
@@ -591,28 +864,37 @@ function EposStateProvider({ children }: { children: React.ReactNode }) {
       await Promise.all([refreshOnchainData(), refreshBalances()]);
       return receipt ? { ok: true, receipt } : { ok: false, message: message || "Payment failed." };
     },
-    [currentUser, getWalletProvider, refreshBalances, refreshOnchainData, setState, state.requests, walletsReady],
+    [currentUser, getWalletProvider, refreshBalances, refreshOnchainData, setState, state.requests, walletsReady, sandboxMode, mockBalances],
   );
+
+  const enrichedRequests = useMemo(() => {
+    return state.requests.map(enrichRequest);
+  }, [state.requests, enrichRequest]);
 
   const value = useMemo<EposContextValue>(
     () => ({
       authReady: ready && isHydrated,
       authConfigured: true,
-      authenticated,
+      authenticated: sandboxMode ? mockAuthenticated : authenticated,
       currentUser,
-      requests: state.requests,
+      requests: enrichedRequests,
       receipts: state.receipts,
-      balances,
+      balances: sandboxMode ? mockBalances : balances,
       isFeedLoading,
       feedError,
       login,
       loginWithWallet,
-      logout: privyLogout,
+      logout,
       refreshOnchainData,
       refreshBalances,
       claimUsername,
       createRequest,
       payRequest,
+      sandboxMode,
+      toggleSandboxMode,
+      mintMockTokens,
+      reactToRequest,
+      withdrawMockUsdc,
     }),
     [
       authenticated,
@@ -626,12 +908,19 @@ function EposStateProvider({ children }: { children: React.ReactNode }) {
       login,
       loginWithWallet,
       payRequest,
-      privyLogout,
+      logout,
       ready,
       refreshBalances,
       refreshOnchainData,
       state.receipts,
-      state.requests,
+      enrichedRequests,
+      sandboxMode,
+      toggleSandboxMode,
+      mintMockTokens,
+      reactToRequest,
+      withdrawMockUsdc,
+      mockAuthenticated,
+      mockBalances,
     ],
   );
 
@@ -639,29 +928,303 @@ function EposStateProvider({ children }: { children: React.ReactNode }) {
 }
 
 function MissingPrivyProvider({ children }: { children: React.ReactNode }) {
-  const [state] = usePersistedState();
+  const [state, setState] = usePersistedState();
+
+  const [mockAuthenticated, setMockAuthenticated] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("epos.sandbox.authenticated") === "true";
+    }
+    return false;
+  });
+
+  const [mockUsername, setMockUsername] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("epos.sandbox.username");
+    }
+    return null;
+  });
+
+  const [mockBalances, setMockBalances] = useState<WalletBalances>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("epos.sandbox.balances");
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+    return { eth: 0.05, usdc: 100.0 };
+  });
+
+  const [reactionIncrements, setReactionIncrements] = useState<Record<string, { pray: number; watch: number; support: number }>>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("epos.sandbox.reactions");
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+    return {};
+  });
+
+  useEffect(() => {
+    localStorage.setItem("epos.sandbox.authenticated", String(mockAuthenticated));
+  }, [mockAuthenticated]);
+
+  useEffect(() => {
+    if (mockUsername) {
+      localStorage.setItem("epos.sandbox.username", mockUsername);
+    } else {
+      localStorage.removeItem("epos.sandbox.username");
+    }
+  }, [mockUsername]);
+
+  useEffect(() => {
+    localStorage.setItem("epos.sandbox.balances", JSON.stringify(mockBalances));
+  }, [mockBalances]);
+
+  useEffect(() => {
+    localStorage.setItem("epos.sandbox.reactions", JSON.stringify(reactionIncrements));
+  }, [reactionIncrements]);
+
+  const enrichRequest = useCallback((request: EposRequest): EposRequest => {
+    const reqId = request.id;
+    let idHash = 0;
+    for (let i = 0; i < reqId.length; i++) {
+      idHash += reqId.charCodeAt(i);
+    }
+    const initPray = (idHash % 7) + 2;
+    const initWatch = (idHash % 5) + 1;
+    const initSupport = (idHash % 9) + 3;
+    const incs = reactionIncrements[reqId] ?? { pray: 0, watch: 0, support: 0 };
+    
+    const created = new Date(request.createdAt);
+    const now = new Date();
+    const diffMs = now.getTime() - created.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const sapaDays = diffDays > 0 ? diffDays + 1 : (idHash % 4) + 1;
+
+    return {
+      ...request,
+      reactions: {
+        pray: initPray + incs.pray,
+        watch: initWatch + incs.watch,
+        support: initSupport + incs.support,
+      },
+      sapaDays,
+    };
+  }, [reactionIncrements]);
+
+  const reactToRequest = useCallback((requestId: string, reactionType: "pray" | "watch" | "support") => {
+    setReactionIncrements((prev) => {
+      const current = prev[requestId] ?? { pray: 0, watch: 0, support: 0 };
+      return {
+        ...prev,
+        [requestId]: {
+          ...current,
+          [reactionType]: current[reactionType] + 1,
+        },
+      };
+    });
+  }, []);
+
+  const mintMockTokens = useCallback(() => {
+    setMockBalances((prev) => ({
+      eth: Number((prev.eth + 0.05).toFixed(5)),
+      usdc: Number((prev.usdc + 100.0).toFixed(2)),
+    }));
+  }, []);
+
+  const currentUser = useMemo<EposUser | null>(() => {
+    if (!mockAuthenticated) {
+      return null;
+    }
+    return {
+      id: "sandbox-user",
+      identifier: "sandbox@epos.xyz",
+      displayName: mockUsername ? `@${mockUsername}` : "sandbox@epos.xyz",
+      walletAddress: "0xSandboxWalletAddressBaseSepolia",
+      username: mockUsername,
+    };
+  }, [mockAuthenticated, mockUsername]);
+
+  const login = useCallback((): ActionResult => {
+    setMockAuthenticated(true);
+    return { ok: true };
+  }, []);
+
+  const loginWithWallet = useCallback((): ActionResult => {
+    setMockAuthenticated(true);
+    return { ok: true };
+  }, []);
+
+  const logout = useCallback(async () => {
+    setMockAuthenticated(false);
+    setMockUsername(null);
+  }, []);
+
+  const claimUsername = useCallback(async (value: string): Promise<ActionResult> => {
+    const clean = normalizeUsername(value);
+    if (clean.length < 3 || clean.length > 15) {
+      return { ok: false, message: "Username must be 3-15 characters." };
+    }
+    setMockUsername(clean);
+    return { ok: true };
+  }, []);
+
+  const createRequest = useCallback(async (input: CreateRequestInput): Promise<CreateRequestResult> => {
+    const amount = Number(input.amount);
+    const reason = input.reason.trim();
+    if (!currentUser?.username) {
+      return { ok: false, message: "Claim your username first." };
+    }
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return { ok: false, message: "Enter a valid USDC amount." };
+    }
+    if (!reason) {
+      return { ok: false, message: "Enter a reason for your request." };
+    }
+
+    const mockId = Math.floor(Math.random() * 1000000).toString();
+    const created: EposRequest = {
+      id: mockId,
+      slug: requestSlug(currentUser.username, reason, mockId),
+      username: currentUser.username,
+      amount,
+      reason,
+      createdAt: new Date().toISOString(),
+      status: "open",
+      fulfilledBy: null,
+      fulfilledAt: null,
+      onchainRequestId: mockId,
+    };
+    setState((prev) => ({
+      ...prev,
+      requests: [created, ...prev.requests],
+    }));
+    return { ok: true, request: created };
+  }, [currentUser, setState]);
+
+  const payRequest = useCallback(async (slug: string): Promise<PayRequestResult> => {
+    if (!currentUser) {
+      return { ok: false, message: "Sign in first." };
+    }
+    const target = state.requests.find((request) => request.slug === slug);
+    if (!target) {
+      return { ok: false, message: "Request not found." };
+    }
+    if (target.status === "fulfilled") {
+      return { ok: false, message: "This request is already fulfilled." };
+    }
+    if (currentUser.username && currentUser.username === target.username) {
+      return { ok: false, message: "You cannot fulfill your own request." };
+    }
+
+    if (mockBalances.usdc < target.amount) {
+      return { ok: false, message: `Your sandbox wallet only has ${mockBalances.usdc.toFixed(2)} USDC.` };
+    }
+    if (mockBalances.eth <= 0) {
+      return { ok: false, message: "Your sandbox wallet needs ETH for gas." };
+    }
+
+    setMockBalances((prev) => ({
+      eth: Number((prev.eth - 0.001).toFixed(5)),
+      usdc: Number((prev.usdc - target.amount).toFixed(2)),
+    }));
+
+    let receipt: EposReceipt | undefined;
+    const now = new Date().toISOString();
+    const sender = currentUser.username ? `@${currentUser.username}` : currentUser.identifier;
+
+    setState((prev) => {
+      const index = prev.requests.findIndex((request) => request.slug === slug);
+      if (index === -1) return prev;
+      const targetReq = prev.requests[index];
+
+      const updatedRequests = [...prev.requests];
+      updatedRequests[index] = {
+        ...targetReq,
+        status: "fulfilled",
+        fulfilledBy: sender,
+        fulfilledAt: now,
+      };
+      receipt = {
+        id: generateId("receipt"),
+        requestId: targetReq.id,
+        slug: targetReq.slug,
+        from: sender,
+        to: `@${targetReq.username}`,
+        amount: targetReq.amount,
+        reason: targetReq.reason,
+        createdAt: now,
+      };
+      return {
+        ...prev,
+        requests: updatedRequests,
+        receipts: [receipt, ...prev.receipts],
+      };
+    });
+
+    return receipt ? { ok: true, receipt } : { ok: false, message: "Payment failed." };
+  }, [currentUser, state.requests, mockBalances, setState]);
+
+  const withdrawMockUsdc = useCallback((amount: number) => {
+    setMockBalances((prev) => ({
+      ...prev,
+      usdc: Number(Math.max(0, prev.usdc - amount).toFixed(2)),
+    }));
+  }, []);
+
+  const enrichedRequests = useMemo(() => {
+    return state.requests.map(enrichRequest);
+  }, [state.requests, enrichRequest]);
 
   const value = useMemo<EposContextValue>(
     () => ({
       authReady: true,
       authConfigured: false,
-      authenticated: false,
-      currentUser: null,
-      requests: state.requests,
+      authenticated: mockAuthenticated,
+      currentUser,
+      requests: enrichedRequests,
       receipts: state.receipts,
-      balances: null,
+      balances: mockBalances,
       isFeedLoading: false,
       feedError: "",
-      login: () => ({ ok: false, message: "Set NEXT_PUBLIC_PRIVY_APP_ID to enable real Privy sign-in." }),
-      loginWithWallet: () => ({ ok: false, message: "Set NEXT_PUBLIC_PRIVY_APP_ID to enable wallet sign-in." }),
-      logout: async () => {},
-      refreshOnchainData: async () => ({ ok: false, message: "Set NEXT_PUBLIC_PRIVY_APP_ID first." }),
-      refreshBalances: async () => ({ ok: false, message: "Sign in with Privy first." }),
-      claimUsername: async () => ({ ok: false, message: "Sign in with Privy first." }),
-      createRequest: async () => ({ ok: false, message: "Sign in with Privy first." }),
-      payRequest: async () => ({ ok: false, message: "Sign in with Privy first." }),
+      login,
+      loginWithWallet,
+      logout,
+      refreshOnchainData: async () => ({ ok: true }),
+      refreshBalances: async () => ({ ok: true }),
+      claimUsername,
+      createRequest,
+      payRequest,
+      sandboxMode: true,
+      toggleSandboxMode: () => {},
+      mintMockTokens,
+      reactToRequest,
+      withdrawMockUsdc,
     }),
-    [state.receipts, state.requests],
+    [
+      mockAuthenticated,
+      currentUser,
+      enrichedRequests,
+      state.receipts,
+      mockBalances,
+      login,
+      loginWithWallet,
+      logout,
+      claimUsername,
+      createRequest,
+      payRequest,
+      mintMockTokens,
+      reactToRequest,
+      withdrawMockUsdc,
+    ],
   );
 
   return <EposContext.Provider value={value}>{children}</EposContext.Provider>;

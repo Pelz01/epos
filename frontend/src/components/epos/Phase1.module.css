@@ -444,3 +444,406 @@
     border-radius: 16px;
   }
 }
+
+/* ── Sandbox Banner & Toggles ── */
+.sandboxBanner {
+  background: linear-gradient(90deg, #ea580c, #ca8a04);
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.15);
+}
+
+.sandboxToggleContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: rgba(234, 88, 12, 0.06);
+  border: 1px dashed rgba(234, 88, 12, 0.3);
+  border-radius: 14px;
+  margin-bottom: 1rem;
+}
+
+.sandboxLabel {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #ea580c;
+}
+
+.sandboxToggleSwitch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.sandboxToggleSwitch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #cbd5e1;
+  transition: .3s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+input:checked + .slider {
+  background-color: #ea580c;
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+/* ── Sapa Streak Badge ── */
+.streakBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #b45309;
+  border: 1px solid #fcd34d;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.08);
+}
+
+/* ── Live Emoji Reactions ── */
+.reactionsRow {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  flex-wrap: wrap;
+}
+
+.reactionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--foreground);
+}
+
+.reactionBtn:hover {
+  background: #ffffff;
+  border-color: var(--primary);
+  transform: scale(1.05);
+}
+
+.reactionBtn:active {
+  transform: scale(0.95);
+}
+
+.reactionCount {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.floatingEmojiContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.floatingEmoji {
+  position: absolute;
+  font-size: 1.5rem;
+  animation: floatEmojiUp 1.2s cubic-bezier(0.08, 0.82, 0.17, 1) forwards;
+  opacity: 1;
+}
+
+@keyframes floatEmojiUp {
+  0% {
+    transform: translateY(100%) scale(0.5) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-120%) scale(1.2) rotate(var(--rotation, 15deg));
+    opacity: 0;
+  }
+}
+
+/* ── Withdraw Offramp Simulator ── */
+.offrampCard {
+  margin-top: 1.5rem;
+}
+
+.offrampSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 1.25rem 0;
+}
+
+.offrampStep {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.stepIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: #ffffff;
+  flex-shrink: 0;
+  color: #94a3b8;
+}
+
+.offrampStepActive {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.offrampStepActive .stepIcon {
+  border-color: var(--primary);
+  color: var(--primary);
+  animation: stepPulse 1.5s infinite;
+}
+
+.offrampStepDone {
+  color: var(--success);
+}
+
+.offrampStepDone .stepIcon {
+  border-color: var(--success);
+  background: var(--success);
+  color: white;
+}
+
+@keyframes stepPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.2); }
+  50% { box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.2); }
+}
+
+/* ── Bag Secured Confirmation Card ── */
+.bagSecuredCard {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(5, 150, 105, 0.05));
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 20px;
+  padding: 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  animation: phaseSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.bagSecuredEmoji {
+  font-size: 3rem;
+  display: inline-block;
+  animation: bagPulse 2s ease-in-out infinite;
+}
+
+@keyframes bagPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1) rotate(5deg); }
+}
+
+.bagSecuredTitle {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #065f46;
+}
+
+.bagSecuredAmount {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--foreground);
+  letter-spacing: -0.04em;
+}
+
+.bagSecuredDetail {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.02);
+  width: 100%;
+}
+
+/* ── Glassmorphic Visual Receipt Card ── */
+.visualReceiptCard {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 24px;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.visualReceiptCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+}
+
+.receiptCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.verifiedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(124, 58, 237, 0.1));
+  color: var(--primary);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 0.35rem 0.65rem;
+  border-radius: 8px;
+  letter-spacing: 0.05em;
+  border: 1px solid rgba(37, 99, 235, 0.15);
+}
+
+.receiptFlow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  margin: 0.75rem 0;
+}
+
+.receiptAvatarBubble {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 800;
+  font-size: 1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border: 2px solid white;
+}
+
+.receiptArrow {
+  color: var(--text-muted);
+  opacity: 0.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.receiptValueSection {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.receiptPrimaryVal {
+  font-size: 2.2rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, var(--foreground), #4b5563);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.receiptSecondaryVal {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--success);
+}
+
+.receiptMetadataGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 16px;
+  padding: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.receiptMetaLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.15rem;
+}
+
+.receiptMetaValue {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--foreground);
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}

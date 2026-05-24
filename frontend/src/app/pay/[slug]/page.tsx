@@ -11,6 +11,28 @@ function formatDate(iso: string): string {
   return new Date(iso).toLocaleString();
 }
 
+function getInitials(username: string): string {
+  const clean = username.replace(/^@+/, "");
+  return clean.slice(0, 2).toUpperCase();
+}
+
+function getAvatarColor(username: string): string {
+  const colors = [
+    "linear-gradient(135deg, #2563eb, #4f46e5)",
+    "linear-gradient(135deg, #7c3aed, #c026d3)",
+    "linear-gradient(135deg, #059669, #0d9488)",
+    "linear-gradient(135deg, #d97706, #ea580c)",
+    "linear-gradient(135deg, #2563eb, #7c3aed)",
+    "linear-gradient(135deg, #dc2626, #e11d48)",
+  ];
+  let hash = 0;
+  const clean = username.replace(/^@+/, "");
+  for (let i = 0; i < clean.length; i++) {
+    hash = clean.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+}
+
 export default function PayPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
   const {
@@ -238,23 +260,81 @@ export default function PayPage({ params }: { params: Promise<{ slug: string }> 
           </div>
 
           <div className={phaseStyles.stack}>
-            <div className={phaseStyles.card}>
-              <h3 className={phaseStyles.strong}>Receipt Card</h3>
-              {!receiptId && request.status !== "fulfilled" && (
+            {(!receiptId && request.status !== "fulfilled") ? (
+              <div className={phaseStyles.card}>
+                <h3 className={phaseStyles.strong}>Receipt Card</h3>
                 <div className={phaseStyles.empty} style={{ marginTop: "0.75rem" }}>
                   Complete payment to generate receipt.
                 </div>
-              )}
-              {(receiptId || request.status === "fulfilled") && (
-                <div className={`${phaseStyles.status} ${phaseStyles.statusOk}`} style={{ marginTop: "0.75rem" }}>
-                  {request.fulfilledBy || "Someone"} eposed @{request.username} with {request.amount} USDC.
+              </div>
+            ) : (
+              <div className={phaseStyles.visualReceiptCard}>
+                <div className={phaseStyles.receiptCardHeader}>
+                  <div>
+                    <h3 style={{ fontWeight: 800, fontSize: "1.1rem", marginBottom: "0.15rem" }}>Payment Receipt</h3>
+                    <p className={phaseStyles.mini}>Base Sepolia Transaction</p>
+                  </div>
+                  <span className={phaseStyles.verifiedBadge}>Epos Verified ✓</span>
                 </div>
-              )}
-              <p className={phaseStyles.muted} style={{ marginTop: "0.75rem" }}>
-                Share text: {request.fulfilledBy || "Someone"} eposed @{request.username}
-              </p>
-            </div>
 
+                <div className={phaseStyles.receiptFlow}>
+                  <div 
+                    className={phaseStyles.receiptAvatarBubble}
+                    style={{ background: getAvatarColor(request.fulfilledBy || "Giver") }}
+                  >
+                    {getInitials(request.fulfilledBy || "Giver")}
+                  </div>
+                  <div className={phaseStyles.receiptArrow}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                      <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                  </div>
+                  <div 
+                    className={phaseStyles.receiptAvatarBubble}
+                    style={{ background: getAvatarColor(request.username) }}
+                  >
+                    {getInitials(request.username)}
+                  </div>
+                </div>
+
+                <div className={phaseStyles.receiptValueSection}>
+                  <div className={phaseStyles.receiptPrimaryVal}>{request.amount} USDC</div>
+                  <div className={phaseStyles.receiptSecondaryVal}>~₦{(request.amount * 1450).toLocaleString(undefined, { minimumFractionDigits: 2 })} NGN</div>
+                </div>
+
+                <div className={phaseStyles.receiptMetadataGrid}>
+                  <div>
+                    <div className={phaseStyles.receiptMetaLabel}>From</div>
+                    <div className={phaseStyles.receiptMetaValue}>{request.fulfilledBy || "Anonymous Giver"}</div>
+                  </div>
+                  <div>
+                    <div className={phaseStyles.receiptMetaLabel}>To</div>
+                    <div className={phaseStyles.receiptMetaValue}>@{request.username}</div>
+                  </div>
+                  <div style={{ gridColumn: "span 2" }}>
+                    <div className={phaseStyles.receiptMetaLabel}>For</div>
+                    <div className={phaseStyles.receiptMetaValue} style={{ whiteSpace: "normal" }}>&ldquo;{request.reason}&rdquo;</div>
+                  </div>
+                  <div style={{ gridColumn: "span 2" }}>
+                    <div className={phaseStyles.receiptMetaLabel}>Date & Time</div>
+                    <div className={phaseStyles.receiptMetaValue}>{formatDate(request.fulfilledAt || new Date().toISOString())}</div>
+                  </div>
+                </div>
+
+                <div className={phaseStyles.row}>
+                  <Button 
+                    style={{ width: "100%" }}
+                    onClick={() => {
+                      const text = encodeURIComponent(`I just eposed @${request.username} with ${request.amount} USDC on Base Sepolia! ⚡💳\n\nepos.xyz`);
+                      window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
+                    }}
+                  >
+                    Share on Twitter
+                  </Button>
+                </div>
+              </div>
+            )}
             <Link href={`/${request.username}`}>
               <Button variant="secondary">View @{request.username} Profile</Button>
             </Link>

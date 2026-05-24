@@ -1,11 +1,19 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import AppLayout from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/Button";
 import { useEpos } from "@/components/epos/EposProvider";
 import phaseStyles from "@/components/epos/Phase1.module.css";
+
+interface FloatingEmoji {
+  id: string;
+  emoji: string;
+  x: number;
+  y: number;
+  rotation: number;
+}
 
 function prettyTime(iso: string): string {
   const date = new Date(iso);
@@ -42,7 +50,8 @@ function getAvatarColor(username: string): string {
 }
 
 export default function FeedPage() {
-  const { requests, receipts, isFeedLoading, feedError, refreshOnchainData } = useEpos();
+  const { requests, receipts, isFeedLoading, feedError, refreshOnchainData, reactToRequest } = useEpos();
+  const [floatingEmojis, setFloatingEmojis] = useState<FloatingEmoji[]>([]);
 
   const sortedRequests = useMemo(
     () =>
@@ -68,6 +77,32 @@ export default function FeedPage() {
     }
     return [...score.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
   }, [receipts, requests]);
+
+  const handleReact = (
+    requestId: string,
+    type: "pray" | "watch" | "support",
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    reactToRequest(requestId, type);
+
+    const containerRect = event.currentTarget.parentElement?.getBoundingClientRect();
+    if (containerRect) {
+      const emojiMap = { pray: "🙏", watch: "👀", support: "❤️" };
+      const x = event.clientX - containerRect.left;
+      const y = event.clientY - containerRect.top - 20; // offset slightly above cursor
+      const rotation = Math.random() * 40 - 20; // random tilt
+      const id = `${requestId}-${Date.now()}-${Math.random()}`;
+
+      setFloatingEmojis((prev) => [
+        ...prev,
+        { id, emoji: emojiMap[type], x, y, rotation },
+      ]);
+
+      setTimeout(() => {
+        setFloatingEmojis((prev) => prev.filter((item) => item.id !== id));
+      }, 1200);
+    }
+  };
 
   return (
     <AppLayout>
@@ -129,13 +164,21 @@ export default function FeedPage() {
                     </Link>
                     <p className={phaseStyles.mini}>{prettyTime(item.createdAt)}</p>
                   </div>
-                  <span
-                    className={`${phaseStyles.pill} ${
-                      item.status === "open" ? phaseStyles.badgeOpen : phaseStyles.badgeDone
-                    }`}
-                  >
-                    {item.status === "open" ? "Open" : "Fulfilled"}
-                  </span>
+                  
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.3rem" }}>
+                    <span
+                      className={`${phaseStyles.pill} ${
+                        item.status === "open" ? phaseStyles.badgeOpen : phaseStyles.badgeDone
+                      }`}
+                    >
+                      {item.status === "open" ? "Open" : "Fulfilled"}
+                    </span>
+                    {item.status === "open" && item.sapaDays && (
+                      <span className={phaseStyles.streakBadge}>
+                        🔥 Day {item.sapaDays}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <p style={{ fontSize: "1.02rem", lineHeight: 1.5, marginBottom: "0.75rem" }}>{item.reason}</p>
@@ -150,6 +193,47 @@ export default function FeedPage() {
                     Fulfilled by {item.fulfilledBy} · {item.fulfilledAt ? prettyTime(item.fulfilledAt) : "recently"}
                   </div>
                 )}
+
+                {/* ── Interactive Reactions Row ── */}
+                <div className={phaseStyles.reactionsRow} style={{ position: "relative" }}>
+                  <button
+                    className={phaseStyles.reactionBtn}
+                    onClick={(e) => handleReact(item.id, "pray", e)}
+                  >
+                    🙏 <span className={phaseStyles.reactionCount}>{item.reactions?.pray ?? 0}</span>
+                  </button>
+                  <button
+                    className={phaseStyles.reactionBtn}
+                    onClick={(e) => handleReact(item.id, "watch", e)}
+                  >
+                    👀 <span className={phaseStyles.reactionCount}>{item.reactions?.watch ?? 0}</span>
+                  </button>
+                  <button
+                    className={phaseStyles.reactionBtn}
+                    onClick={(e) => handleReact(item.id, "support", e)}
+                  >
+                    ❤️ <span className={phaseStyles.reactionCount}>{item.reactions?.support ?? 0}</span>
+                  </button>
+
+                  {/* Floating emojis renderer */}
+                  <div className={phaseStyles.floatingEmojiContainer}>
+                    {floatingEmojis
+                      .filter((emoji) => emoji.id.startsWith(item.id))
+                      .map((emoji) => (
+                        <span
+                          key={emoji.id}
+                          className={phaseStyles.floatingEmoji}
+                          style={{
+                            left: `${emoji.x}px`,
+                            top: `${emoji.y}px`,
+                            "--rotation": `${emoji.rotation}deg`,
+                          } as React.CSSProperties}
+                        >
+                          {emoji.emoji}
+                        </span>
+                      ))}
+                  </div>
+                </div>
               </div>
             ))}
           </div>

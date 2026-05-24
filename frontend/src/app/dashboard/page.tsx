@@ -41,6 +41,7 @@ export default function DashboardPage() {
     refreshBalances,
     refreshOnchainData,
     logout,
+    withdrawMockUsdc,
   } = useEpos();
   const [username, setUsername] = useState("");
   const [amount, setAmount] = useState("15");
@@ -50,6 +51,54 @@ export default function DashboardPage() {
   const [lastLink, setLastLink] = useState("");
   const [isClaiming, setIsClaiming] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+
+  // ── Naira Offramp Simulator States ──
+  const [offrampStep, setOfframpStep] = useState<number>(0); // 0: idle, 1: verifying, 2: rate lock, 3: bank transfer, 4: success
+  const [withdrawBank, setWithdrawBank] = useState("GTBank");
+  const [withdrawAccount, setWithdrawAccount] = useState("");
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [offrampNaira, setOfframpNaira] = useState(0);
+
+  const handleWithdraw = (e: React.FormEvent) => {
+    e.preventDefault();
+    const usdcVal = Number(withdrawAmount);
+    if (!balances || usdcVal <= 0 || usdcVal > balances.usdc) {
+      setTone("error");
+      setMessage(`Enter a valid amount up to ${balances ? balances.usdc : 0} USDC.`);
+      return;
+    }
+    if (withdrawAccount.length !== 10 || !/^\d+$/.test(withdrawAccount)) {
+      setTone("error");
+      setMessage("Enter a valid 10-digit Nigerian bank account number.");
+      return;
+    }
+
+    setTone("ok");
+    setMessage("");
+    setOfframpStep(1);
+    setOfframpNaira(usdcVal * 1450);
+
+    // Step 1 -> Step 2
+    setTimeout(() => {
+      setOfframpStep(2);
+      // Step 2 -> Step 3
+      setTimeout(() => {
+        setOfframpStep(3);
+        // Step 3 -> Step 4 (Success)
+        setTimeout(() => {
+          setOfframpStep(4);
+          withdrawMockUsdc(usdcVal);
+          refreshBalances();
+        }, 1500);
+      }, 1500);
+    }, 1500);
+  };
+
+  const resetOfframp = () => {
+    setOfframpStep(0);
+    setWithdrawAmount("");
+    setWithdrawAccount("");
+  };
 
   const userRequests = currentUser?.username
     ? requests.filter((item) => item.username === currentUser.username)
@@ -373,22 +422,153 @@ export default function DashboardPage() {
                   )}
                 </div>
 
-                <div className={`${phaseStyles.card} ${phaseStyles.stack} ${phaseStyles.animateIn}`}>
-                  <h3 className={phaseStyles.strong}>Quick Info</h3>
-                  <p className={phaseStyles.muted}>
-                    Feed: {isFeedLoading ? "syncing..." : "up to date"} · Base Sepolia
-                  </p>
-                  {feedError && <div className={`${phaseStyles.status} ${phaseStyles.statusError}`}>{feedError}</div>}
-                  <Button variant="secondary" onClick={refreshOnchainData} disabled={isFeedLoading}>
-                    {isFeedLoading ? "Refreshing..." : "Refresh Onchain Feed"}
-                  </Button>
-                  <p className={phaseStyles.muted}>
-                    Public page:{" "}
-                    <Link className={phaseStyles.linkText} href={`/${currentUser.username}`}>
-                      /{currentUser.username}
-                    </Link>
-                  </p>
-                  <p className={phaseStyles.muted}>Requests created: {userRequests.length}</p>
+                <div className={phaseStyles.stack}>
+                  <div className={`${phaseStyles.card} ${phaseStyles.stack} ${phaseStyles.animateIn}`}>
+                    <h3 className={phaseStyles.strong}>Quick Info</h3>
+                    <p className={phaseStyles.muted}>
+                      Feed: {isFeedLoading ? "syncing..." : "up to date"} · Base Sepolia
+                    </p>
+                    {feedError && <div className={`${phaseStyles.status} ${phaseStyles.statusError}`}>{feedError}</div>}
+                    <Button variant="secondary" onClick={refreshOnchainData} disabled={isFeedLoading}>
+                      {isFeedLoading ? "Refreshing..." : "Refresh Onchain Feed"}
+                    </Button>
+                    <p className={phaseStyles.muted}>
+                      Public page:{" "}
+                      <Link className={phaseStyles.linkText} href={`/${currentUser.username}`}>
+                        /{currentUser.username}
+                      </Link>
+                    </p>
+                    <p className={phaseStyles.muted}>Requests created: {userRequests.length}</p>
+                  </div>
+
+                  {/* ── Withdraw Simulator Panel ── */}
+                  {balances && balances.usdc > 0 && (
+                    <div className={phaseStyles.animateIn} style={{ animationDelay: "80ms" }}>
+                      {offrampStep === 4 ? (
+                        <div className={phaseStyles.bagSecuredCard}>
+                          <span className={phaseStyles.bagSecuredEmoji}>🎒</span>
+                          <h3 className={phaseStyles.bagSecuredTitle}>Bag Secured!</h3>
+                          <div className={phaseStyles.bagSecuredAmount}>
+                            ₦{offrampNaira.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </div>
+                          <p className={phaseStyles.muted} style={{ fontSize: '0.92rem', fontWeight: 600 }}>
+                            Naira successfully deposited to your bank account.
+                          </p>
+                          <div className={phaseStyles.bagSecuredDetail}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                              <span>Withdrawn:</span>
+                              <span style={{ fontWeight: 700 }}>{withdrawAmount} USDC</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                              <span>Destination:</span>
+                              <span style={{ fontWeight: 700 }}>{withdrawBank} ({withdrawAccount.slice(0,3)}****{withdrawAccount.slice(-3)})</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                              <span>Exchange Rate:</span>
+                              <span style={{ fontWeight: 700 }}>₦1,450.00 / USDC</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                              <span>Partner:</span>
+                              <span style={{ fontWeight: 700 }}>Yellow Card API ⚡</span>
+                            </div>
+                          </div>
+                          <div className={phaseStyles.row}>
+                            <Button variant="primary" onClick={() => {
+                              const text = encodeURIComponent(`Bag Secured! Just offramped ${withdrawAmount} USDC directly to my ${withdrawBank} account in seconds using @epos_xyz! 🎒⚡\n\nepos.xyz`);
+                              window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
+                            }}>
+                              Share
+                            </Button>
+                            <Button variant="secondary" onClick={resetOfframp}>
+                              Done
+                            </Button>
+                          </div>
+                        </div>
+                      ) : offrampStep > 0 ? (
+                        <div className={`${phaseStyles.card} ${phaseStyles.offrampCard}`}>
+                          <h3 className={phaseStyles.strong}>Withdrawal Processing</h3>
+                          <p className={phaseStyles.muted}>Settlement in progress...</p>
+                          <div className={phaseStyles.offrampSteps}>
+                            <div className={`${phaseStyles.offrampStep} ${offrampStep === 1 ? phaseStyles.offrampStepActive : offrampStep > 1 ? phaseStyles.offrampStepDone : ""}`}>
+                              <span className={phaseStyles.stepIcon}>{offrampStep > 1 ? "✓" : "1"}</span>
+                              <span>Verifying {withdrawBank} Account...</span>
+                            </div>
+                            <div className={`${phaseStyles.offrampStep} ${offrampStep === 2 ? phaseStyles.offrampStepActive : offrampStep > 2 ? phaseStyles.offrampStepDone : ""}`}>
+                              <span className={phaseStyles.stepIcon}>{offrampStep > 2 ? "✓" : "2"}</span>
+                              <span>Locking Conversion Rate (₦1,450.00)...</span>
+                            </div>
+                            <div className={`${phaseStyles.offrampStep} ${offrampStep === 3 ? phaseStyles.offrampStepActive : offrampStep > 3 ? phaseStyles.offrampStepDone : ""}`}>
+                              <span className={phaseStyles.stepIcon}>{offrampStep > 3 ? "✓" : "3"}</span>
+                              <span>Sending ₦{offrampNaira.toLocaleString()} Naira Transfer...</span>
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.5rem 0' }}>
+                            <div style={{ width: "20px", height: "20px", border: "2px solid var(--primary)", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite" }}></div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className={`${phaseStyles.card} ${phaseStyles.stack}`}>
+                          <h3 className={phaseStyles.strong}>Withdraw to Local Bank</h3>
+                          <p className={phaseStyles.muted}>Convert USDC to Naira instantly to your bank account.</p>
+                          <form className={phaseStyles.stack} onSubmit={handleWithdraw}>
+                            <div>
+                              <label className={phaseStyles.label}>Select Bank</label>
+                              <select 
+                                className={phaseStyles.input}
+                                value={withdrawBank} 
+                                onChange={(e) => setWithdrawBank(e.target.value)}
+                              >
+                                <option value="GTBank">GTBank</option>
+                                <option value="Zenith Bank">Zenith Bank</option>
+                                <option value="Access Bank">Access Bank</option>
+                                <option value="UBA">UBA</option>
+                                <option value="Kuda Bank">Kuda Bank</option>
+                                <option value="OPay">OPay</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className={phaseStyles.label}>Account Number</label>
+                              <input 
+                                className={phaseStyles.input}
+                                type="text" 
+                                placeholder="0123456789"
+                                maxLength={10}
+                                value={withdrawAccount} 
+                                onChange={(e) => setWithdrawAccount(e.target.value.replace(/\D/g, ""))}
+                              />
+                            </div>
+                            <div>
+                              <label className={phaseStyles.label}>Amount (USDC)</label>
+                              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <input 
+                                  className={phaseStyles.input}
+                                  type="number" 
+                                  placeholder="Min 1 USDC"
+                                  min={1}
+                                  max={balances ? balances.usdc : 0}
+                                  value={withdrawAmount} 
+                                  onChange={(e) => setWithdrawAmount(e.target.value)}
+                                />
+                                <Button 
+                                  type="button" 
+                                  variant="secondary"
+                                  onClick={() => balances && setWithdrawAmount(balances.usdc.toString())}
+                                >
+                                  Max
+                                </Button>
+                              </div>
+                            </div>
+                            <Button 
+                              type="submit" 
+                              disabled={!balances || balances.usdc < 1}
+                            >
+                              {!balances || balances.usdc < 1 ? "Insufficient USDC Balance" : "Withdraw to Bank"}
+                            </Button>
+                          </form>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
