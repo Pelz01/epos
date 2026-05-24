@@ -232,75 +232,152 @@ async function getBlockIso(blockNumber: bigint, cache: Map<string, string>): Pro
 }
 
 export async function fetchOnchainRequests(): Promise<OnchainRequestEvent[]> {
-  const latest = await publicClient.getBlockNumber();
-  const step = BigInt(50_000);
-  const createdLogs = [];
-  const fulfilledLogs = [];
-
-  for (let fromBlock = EPOS_DEPLOYMENT_BLOCK; fromBlock <= latest; fromBlock += step + BigInt(1)) {
-    const toBlock = fromBlock + step > latest ? latest : fromBlock + step;
-    const [createdChunk, fulfilledChunk] = await Promise.all([
-      publicClient.getContractEvents({
-        address: EPOS_REQUESTS_ADDRESS,
-        abi: eposRequestsAbi,
-        eventName: "RequestCreated",
-        fromBlock,
-        toBlock,
-      }),
-      publicClient.getContractEvents({
-        address: EPOS_REQUESTS_ADDRESS,
-        abi: eposRequestsAbi,
-        eventName: "RequestFulfilled",
-        fromBlock,
-        toBlock,
-      }),
-    ]);
-    createdLogs.push(...createdChunk);
-    fulfilledLogs.push(...fulfilledChunk);
-  }
-
-  const blockTimes = new Map<string, string>();
-  const fulfillments = new Map<
-    string,
-    { giver: string; fulfilledAt: string; transactionHash: `0x${string}` }
-  >();
-
-  for (const log of fulfilledLogs) {
-    if (!log.args.requestId || !log.args.giver || !log.blockNumber) {
-      continue;
+  try {
+    const latest = await publicClient.getBlockNumber();
+    
+    let cachedRequests: OnchainRequestEvent[] = [];
+    let lastScannedBlock = EPOS_DEPLOYMENT_BLOCK;
+    
+    const CACHE_KEY = "epos.onchain.cache.v3";
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem(CACHE_KEY);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed.requests) && parsed.lastScannedBlock) {
+            cachedRequests = parsed.requests;
+            lastScannedBlock = BigInt(parsed.lastScannedBlock);
+          }
+        } catch {
+          // ignore parsing error
+        }
+      }
     }
-    fulfillments.set(log.args.requestId.toString(), {
-      giver: log.args.giver,
-      fulfilledAt: await getBlockIso(log.blockNumber, blockTimes),
-      transactionHash: log.transactionHash,
-    });
-  }
-
-  const requests: OnchainRequestEvent[] = [];
-  for (const log of createdLogs) {
-    const { requestId, recipient, token, amount, username, reason } = log.args;
-    if (!requestId || !recipient || !token || amount === undefined || !username || !reason || !log.blockNumber) {
-      continue;
+    
+    const MAX_INITIAL_SCAN_BLOCKS = BigInt(100_000);
+    let fromBlock = lastScannedBlock + BigInt(1);
+    
+    if (latest - lastScannedBlock > MAX_INITIAL_SCAN_BLOCKS || lastScannedBlock > latest) {
+      fromBlock = latest > MAX_INITIAL_SCAN_BLOCKS ? latest - MAX_INITIAL_SCAN_BLOCKS : EPOS_DEPLOYMENT_BLOCK;
+      cachedRequests = []; // reset cache on huge gap or network reset
     }
-    const id = requestId.toString();
-    const fulfillment = fulfillments.get(id);
-    requests.push({
-      id,
-      recipient,
-      token,
-      amount: fromUsdcUnits(amount),
-      reason,
-      username,
-      createdAt: await getBlockIso(log.blockNumber, blockTimes),
-      status: fulfillment ? "fulfilled" : "open",
-      fulfilledBy: fulfillment?.giver ?? null,
-      fulfilledAt: fulfillment?.fulfilledAt ?? null,
-      transactionHash: log.transactionHash,
-      fulfillmentTransactionHash: fulfillment?.transactionHash ?? null,
-    });
+    
+    let newCreatedLogs: any[] = [];
+    let newFulfilledLogs: any[] = [];
+    
+    if (fromBlock <= latest) {
+      const [createdChunk, fulfilledChunk] = await Promise.all([
+        publicClient.getContractEvents({
+          address: EPOS_REQUESTS_ADDRESS,
+          abi: eposRequestsAbi,
+          eventName: "RequestCreated",
+          fromBlock,
+          toBlock: latest,
+        }),
+        publicClient.getContractEvents({
+          address: EPOS_REQUESTS_ADDRESS,
+          abi: eposRequestsAbi,
+          eventName: "RequestFulfilled",
+          fromBlock,
+          toBlock: latest,
+        }),
+      ]);
+      newCreatedLogs = createdChunk;
+      newFulfilledLogs = fulfilledChunk;
+    }
+    
+    const blockTimes = new Map<string, string>();
+    const newFulfillments = new Map<
+      string,
+      { giver: string; fulfilledAt: string; transactionHash: `0x${string}` }
+    >();
+    
+    for (const log of newFulfilledLogs) {
+      if (!log.args.requestId || !log.args.giver || !log.blockNumber) {
+        continue;
+      }
+      newFulfillments.set(log.args.requestId.toString(), {
+        giver: log.args.giver,
+        fulfilledAt: await getBlockIso(log.blockNumber, blockTimes),
+        transactionHash: log.transactionHash,
+      });
+    }
+    
+    const newRequests: OnchainRequestEvent[] = [];
+    for (const log of newCreatedLogs) {
+      const { requestId, recipient, token, amount, username, reason } = log.args;
+      if (!requestId || !recipient || !token || amount === undefined || !username || !reason || !log.blockNumber) {
+        continue;
+      }
+      const id = requestId.toString();
+      const fulfillment = newFulfillments.get(id);
+      newRequests.push({
+        id,
+        recipient,
+        token,
+        amount: fromUsdcUnits(amount),
+        reason,
+        username,
+        createdAt: await getBlockIso(log.blockNumber, blockTimes),
+        status: fulfillment ? "fulfilled" : "open",
+        fulfilledBy: fulfillment?.giver ?? null,
+        fulfilledAt: fulfillment?.fulfilledAt ?? null,
+        transactionHash: log.transactionHash,
+        fulfillmentTransactionHash: fulfillment?.transactionHash ?? null,
+      });
+    }
+    
+    const requestsMap = new Map<string, OnchainRequestEvent>(
+      cachedRequests.map((req) => [req.id, req])
+    );
+    
+    for (const req of newRequests) {
+      requestsMap.set(req.id, req);
+    }
+    
+    for (const [id, fulfillment] of newFulfillments.entries()) {
+      const cached = requestsMap.get(id);
+      if (cached && cached.status === "open") {
+        requestsMap.set(id, {
+          ...cached,
+          status: "fulfilled",
+          fulfilledBy: fulfillment.giver,
+          fulfilledAt: fulfillment.fulfilledAt,
+          fulfillmentTransactionHash: fulfillment.transactionHash,
+        });
+      }
+    }
+    
+    const mergedRequests = Array.from(requestsMap.values()).sort(
+      (a, b) => Number(BigInt(b.id) - BigInt(a.id))
+    );
+    
+    if (typeof window !== "undefined") {
+      localStorage.setItem(
+        CACHE_KEY,
+        JSON.stringify({
+          lastScannedBlock: latest.toString(),
+          requests: mergedRequests,
+        })
+      );
+    }
+    
+    return mergedRequests;
+  } catch (error) {
+    console.error("fetchOnchainRequests error:", error);
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("epos.onchain.cache.v3");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed.requests)) {
+            return parsed.requests;
+          }
+        } catch {}
+      }
+    }
+    throw error;
   }
-
-  return requests.sort((a, b) => Number(BigInt(b.id) - BigInt(a.id)));
 }
 
 export function encodeClaimUsername(username: string) {
